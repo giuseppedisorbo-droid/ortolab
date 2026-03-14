@@ -433,14 +433,27 @@ body {
     box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
 }
 
-.form-group input:disabled.readonly-empty, 
-.form-group select:disabled.readonly-empty, 
+.form-group input:disabled.readonly-empty,
+.form-group select:disabled.readonly-empty,
 .form-group textarea:disabled.readonly-empty {
     background-color: var(--bg-light);
     border: 1px dashed var(--border-color);
     color: var(--text-muted);
     -webkit-text-fill-color: var(--text-muted);
     opacity: 0.7;
+}
+
+/* New rules from instruction */
+.readonly-empty {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--text-muted);
+}
+
+/* Ensure priority fields keep their yellow background even when read-only filled */
+.priority-field.readonly-filled {
+    background-color: #fef08a !important; /* Yellow */
+    border-color: #fde047 !important;
 }
 
 /* Fix per nascondere l'icona a tendina disabilitata sui select */
@@ -541,9 +554,9 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: white;
-    border: 2px solid #3b82f6;
-    color: #3b82f6;
+    background: #10b981; /* Green by default */
+    border: 2px solid #059669;
+    color: white;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -571,4 +584,12 @@ body {
     background: #10b981 !important;
     border-color: #059669 !important;
     color: white !important;
+}
+
+/* Priority pins that are filled get a thicker green border or ring but stay yellow */
+.schema-pin.priority.filled {
+    background: #fef08a !important;
+    border-color: #10b981 !important;
+    border-width: 3px !important;
+    color: #854d0e !important;
 }
