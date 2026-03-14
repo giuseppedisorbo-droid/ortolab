@@ -732,7 +732,8 @@ let base64LogoCache = null;
 async function getBase64Logo() {
     if (base64LogoCache !== null) return base64LogoCache;
     try {
-        const response = await fetch('logo.png');
+        const urlToFetch = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/') + 'logo.png';
+        const response = await fetch(urlToFetch);
         if (!response.ok) throw new Error('not found');
         const blob = await response.blob();
         base64LogoCache = await new Promise((resolve) => {
@@ -750,7 +751,7 @@ async function getBase64Logo() {
 async function getAnnotatedSchemaBase64(scheda) {
     return new Promise((resolve) => {
         const img = new Image();
-        img.crossOrigin = 'Anonymous';
+        // Remove crossOrigin as it can block same-origin requests on some environments
         img.onload = () => {
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
@@ -815,8 +816,11 @@ async function getAnnotatedSchemaBase64(scheda) {
             });
             resolve(canvas.toDataURL('image/png'));
         };
-        img.onerror = () => resolve(null);
-        img.src = 'schema_misure.png';
+        img.onerror = (e) => {
+            console.error("Errore caricamento schema_misure.png", e);
+            resolve(null);
+        }
+        img.src = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/') + 'schema_misure.png';
     });
 }
 
@@ -980,26 +984,46 @@ window.generateSinglePdf = async function(id) {
             }
         }
         
-        // 2. Fallback universale: classico download/salvataggio forzato del browser se il nativo non è supportato/fallisce
+        // 2. Fallback universale o scelta PC
         if (isMobile) {
-            // Se eravamo su mobile e il web share è fallito, proviamo con l'apertura in nuova finestra per safari
+            // Se eravamo su mobile e il web share è fallito
             const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank');
             setTimeout(() => window.URL.revokeObjectURL(url), 5000);
         } else {
-            // Su PC forziamo solo il download nascosto invisibile
+            // Su PC: proviamo con Web Share ma chiediamo all'utente cosa preferisce fare (poiché Share su PC è incompleto)
+            // Se PC supporta Share, diamo una doppia opzione inviando il download comunque in background
             const url = window.URL.createObjectURL(blob);
+            
+            // Crea il pulsante di download nascosto
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
             a.download = fileName;
             document.body.appendChild(a);
+            
+            // Eseguiamo un download immediato come file
             a.click();
+            
+            // Proviamo a triggerare anche la condivisione se esiste (per mail/whatsapp)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                setTimeout(async () => {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: `Scheda ${scheda.paziente || ''}`,
+                            text: 'In allegato la scheda di valutazione ausili.'
+                        });
+                    } catch (e) {
+                        console.log("Share annulato", e);
+                    }
+                }, 500); // Ritardo per dare precedenza al download
+            }
             
             setTimeout(() => {
                 if(document.body.contains(a)) document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-            }, 1000);
+            }, 5000);
         }
     });
 }
