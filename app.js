@@ -1,3 +1,16 @@
+// --- FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+    apiKey: "AIzaSyC0OFuNjPa8TrOGUfWMELBHS2tB07U7Pu4",
+    authDomain: "eubiotech.firebaseapp.com",
+    projectId: "eubiotech",
+    storageBucket: "eubiotech.firebasestorage.app",
+    messagingSenderId: "55119431815",
+    appId: "1:55119431815:web:5b5ab02b59b1ce51119022"
+};
+const _firebaseApp = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const dataCollection = db.collection('plantari_records');
+
 // --- State Management ---
 let schede = [];
 
@@ -38,49 +51,59 @@ function init() {
 }
 
 function loadData() {
-    const saved = localStorage.getItem('ortos_plantari_v2');
-    if (saved) {
-        schede = JSON.parse(saved);
-    } else {
-        // Dati importati dal file Plantari.gsheet originale
-        schede = [
-            { id: generateId(), progressivo: 2, data: '2026-03-05', paziente: 'RENZI (CASEF)', misura: '42', codice: 'COR 1366X2', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 3, data: '2026-03-05', paziente: 'DELL AQUILA', misura: '42', codice: 'COR-1366X2', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 4, data: '2026-02-27', paziente: 'SCIELZO FRA...', misura: '37', codice: 'POD-PL515B', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 5, data: '2026-03-05', paziente: 'CALABRESE S', misura: '38', codice: 'COR-1366X', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '9L', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 6, data: '2026-03-05', paziente: 'SANTANGELO ROSALIA', misura: '', codice: 'LEVI-LASTRA NERA', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '9L', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 7, data: '2026-03-05', paziente: 'CERBO RAFFA', misura: '43', codice: 'PED-B550VHE', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 8, data: '2026-03-05', paziente: 'SPOSATO GIO', misura: '39', codice: 'POD-515B', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 9, data: '2026-02-27', paziente: 'APICE MICHEL', misura: '37', codice: 'COR-1366X2', rivestimento: 'SI', pellami: 'NO', interiMezzo: '', scarico: '9L', sostegnoMet: '54L', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 10, data: '2026-02-27', paziente: 'LAUDADIO RU', misura: '37', codice: 'COR-1366X2', rivestimento: 'SI', pellami: 'SI', interiMezzo: '37L', scarico: '9L', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 11, data: '2026-03-05', paziente: 'Salvati Dario', misura: '43', codice: '1366x corazza', rivestimento: 'SI', pellami: 'NO', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '60L', pianoInc: '', note: 'Più materiale p' },
-            { id: generateId(), progressivo: 12, data: '2026-03-06', paziente: 'Zippo angela (', misura: '39', codice: 'Baurefiend', rivestimento: 'NO', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 13, data: '2026-03-06', paziente: 'Perugino Paola', misura: '38', codice: 'Pl515b', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '9L', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 14, data: '2026-03-06', paziente: 'Sacco domenic', misura: '41', codice: 'Black 25 leviso', rivestimento: 'SI', pellami: 'NO', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: 'Cad cam' },
-            { id: generateId(), progressivo: 15, data: '2026-03-06', paziente: 'Galardo', misura: '38', codice: 'Cad cam lastra', rivestimento: 'SI', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 16, data: '2026-03-06', paziente: 'Cocca Maria', misura: '38', codice: 'Pl850', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 17, data: '2026-03-06', paziente: 'Luigi audio pro', misura: '41', codice: 'Cor 13366 x', rivestimento: 'NO', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 18, data: '2026-03-06', paziente: 'Lavoretano Cas', misura: '35', codice: 'Corazza memory', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 19, data: '2026-03-06', paziente: 'D angelo', misura: '43', codice: 'Pedsan', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 20, data: '2026-03-06', paziente: 'Longo', misura: '41', codice: 'Corazza memory', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 21, data: '2026-03-10', paziente: 'Ianniciello Roc', misura: '44', codice: 'Black 25 leviso', rivestimento: 'SI', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 22, data: '2026-03-10', paziente: 'Greco anna', misura: '41', codice: 'Corazza bidensita', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 23, data: '2026-03-10', paziente: 'Del giudice', misura: '43', codice: 'Scocca 13366x', rivestimento: 'SI', pellami: 'NO', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 24, data: '2026-03-10', paziente: 'De vivo', misura: '36', codice: 'Corazza SBLRF', rivestimento: 'NO', pellami: 'NO', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 25, data: '2026-03-10', paziente: 'Lettera', misura: '39', codice: 'Cor 1366x', rivestimento: 'NO', pellami: 'SI', interiMezzo: '', scarico: '9L', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 26, data: '2026-03-12', paziente: 'Pisciotta france', misura: '44', codice: 'Corazza lastra nera', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 27, data: '2026-03-13', paziente: 'Pendolino', misura: '44', codice: 'Corazza 16633', rivestimento: 'SI', pellami: 'SI', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 28, data: '2026-03-13', paziente: 'Ferraro Antoni', misura: '41', codice: 'Cor 1366x', rivestimento: 'SI', pellami: '', interiMezzo: '', scarico: '3L', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' },
-            { id: generateId(), progressivo: 29, data: '2026-03-13', paziente: 'Landi Alfonso', misura: '41', codice: 'Levisole deserto', rivestimento: '', pellami: '', interiMezzo: '', scarico: '', sostegnoMet: '', sostegnoVolte: '', pianoInc: '', note: '' }
-        ];
-        // Sort by progressivo desc just as default view
-        schede.sort((a,b) => b.progressivo - a.progressivo);
-        saveData();
-    }
-}
+    grid.innerHTML = '<div class="empty-state"><h3>Connessione al Cloud in corso... <span style="display:inline-block; animation: spin 1s linear infinite;">⚙️</span></h3></div>';
 
-function saveData() {
-    localStorage.setItem('ortos_plantari_v2', JSON.stringify(schede));
+    dataCollection.onSnapshot(snapshot => {
+        if (snapshot.empty) {
+            // Fallback migrazione iniziale se cloud vuoto ma locale pieno
+            const saved = localStorage.getItem('ortos_plantari_v2');
+            if (saved) {
+                const localSchede = JSON.parse(saved);
+                if (localSchede && localSchede.length > 0) {
+                    console.log("Migrazione dati locali verso Firebase in corso...");
+                    let batch = db.batch();
+                    let count = 0;
+                    localSchede.forEach(s => {
+                        batch.set(dataCollection.doc(s.id), s);
+                        count++;
+                    });
+                    if (count > 0) batch.commit().then(() => console.log("Migrazione completata."));
+                }
+            } else {
+                // Se proprio non c'è NULLA, mostro stato vuoto
+                schede = [];
+                renderCards();
+            }
+        } else {
+            let tempSchede = [];
+            snapshot.forEach(doc => {
+                tempSchede.push(doc.data());
+            });
+            // Ordina per progressivo decrescente
+            tempSchede.sort((a,b) => b.progressivo - a.progressivo);
+            schede = tempSchede;
+            renderCards(searchInput.value);
+            
+            // Clean local save after successful cloud sync
+            if(localStorage.getItem('ortos_plantari_v2')) {
+                localStorage.removeItem('ortos_plantari_v2');
+                console.log("Cronologia locale rimossa: si opererà solo sul Cloud!");
+            }
+        }
+    }, error => {
+        console.error("Errore di connessione a Firebase:", error);
+        alert("Errore di connessione al Cloud. Il sistema proverà a usare i dati salvati offline in precedenza.");
+        
+        // Offline Fallback
+        const saved = localStorage.getItem('ortos_plantari_v2');
+        if (saved) {
+            schede = JSON.parse(saved);
+            renderCards(searchInput.value);
+        } else {
+            schede = [];
+            renderCards();
+        }
+    });
 }
 
 function generateId() {
@@ -159,6 +182,11 @@ function closeModal() {
 function handleFormSubmit(e) {
     e.preventDefault();
     
+    const btnSubmit = form.querySelector('button[type="submit"]');
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.innerHTML = 'Salvataggio...';
+    btnSubmit.disabled = true;
+
     const id = inputId.value;
     const nuovaScheda = {
         id: id || generateId(),
@@ -178,27 +206,29 @@ function handleFormSubmit(e) {
         note: inputNote.value
     };
 
-    if (id) {
-        const index = schede.findIndex(s => s.id === id);
-        if(index !== -1) schede[index] = nuovaScheda;
-    } else {
-        schede.unshift(nuovaScheda); // Add to top
-    }
-    
-    // Sort by progressivo desc
-    schede.sort((a,b) => b.progressivo - a.progressivo);
-
-    saveData();
-    closeModal();
-    renderCards(searchInput.value);
+    // Firebase Save
+    dataCollection.doc(nuovaScheda.id).set(nuovaScheda)
+        .then(() => {
+            closeModal();
+            // renderCards comes automatically via onSnapshot!
+        })
+        .catch(err => {
+            console.error("Errore salvataggio Firebase:", err);
+            alert("Impossibile salvare sul Cloud al momento. Controlla la connessione.");
+        })
+        .finally(() => {
+            btnSubmit.innerHTML = originalText;
+            btnSubmit.disabled = false;
+        });
 }
 
 // Expose delete to global scope for inline onclick handler
 window.deleteCard = function(id) {
-    if(confirm("Sei sicuro di voler eliminare questa scheda? L'operazione non è reversibile.")) {
-        schede = schede.filter(s => s.id !== id);
-        saveData();
-        renderCards(searchInput.value);
+    if(confirm("Sei sicuro di voler eliminare questa scheda definivamente dal Cloud?")) {
+        dataCollection.doc(id).delete().catch(err => {
+            console.error("Errore eliminazione:", err);
+            alert("Non è stato possibile eliminare la scheda al momento.");
+        });
     }
 }
 
