@@ -51,6 +51,8 @@ const inputRichieste = document.getElementById('richieste');
 const inputNote = document.getElementById('note');
 
 // --- Initialization ---
+let isFormDirty = false;
+
 function init() {
     loadData();
     setupEventListeners();
@@ -122,6 +124,12 @@ function setupEventListeners() {
     btnNewCard.addEventListener('click', () => openModal());
     btnExportExcel.addEventListener('click', exportToExcel);
     btnExportPdf.addEventListener('click', exportToPdf);
+
+    // Track changes
+    form.addEventListener('input', () => {
+        isFormDirty = true;
+    });
+
     btnCloseModal.addEventListener('click', closeModal);
     btnCancel.addEventListener('click', closeModal);
     
@@ -221,8 +229,14 @@ function openModal(id = null, readOnly = false) {
 }
 
 function closeModal() {
+    if (isFormDirty) {
+        if (!confirm("Hai delle modifiche non salvate. Sei sicuro di voler chiudere? I dati andranno persi.")) {
+            return;
+        }
+    }
     modal.classList.add('hidden');
     document.body.style.overflow = '';
+    isFormDirty = false;
 }
 
 function handleFormSubmit(e) {
@@ -261,6 +275,7 @@ function handleFormSubmit(e) {
     // Firebase Save
     dataCollection.doc(nuovaScheda.id).set(nuovaScheda)
         .then(() => {
+            isFormDirty = false;
             closeModal();
             // renderCards comes automatically via onSnapshot!
         })
@@ -476,9 +491,12 @@ function updateSchemaCounter() {
 if(btnCloseSchema) {
     btnCloseSchema.addEventListener('click', () => {
         const count = countFilledMeasures();
-        if(confirm(`Hai inserito ${count} di 11 misure.\nConfermi i dati e vuoi chiudere lo schema?`)) {
-            if(modalSchema) modalSchema.classList.add('hidden');
+        if(count < 11) {
+            if(!confirm(`Hai inserito solo ${count} di 11 misure.\nSei sicuro di voler chiudere lo schema?`)) {
+                return;
+            }
         }
+        if(modalSchema) modalSchema.classList.add('hidden');
     });
 }
 
@@ -542,6 +560,7 @@ function savePopover() {
     if(currentPinMeasure && currentPinElement) {
         const mainInput = document.getElementById(currentPinMeasure);
         if(mainInput && popoverInput) {
+            if(mainInput.value !== popoverInput.value) isFormDirty = true;
             mainInput.value = popoverInput.value;
         }
         if(popover) popover.classList.add('hidden');
@@ -822,7 +841,8 @@ window.generateSinglePdf = async function(id) {
 
     const docDefinition = {
         pageOrientation: 'landscape',
-        pageMargins: [40, 20, 40, 30],
+        pageMargins: [30, 15, 30, 15],
+        pageSize: 'A4',
         content: [
             // Header
             {
@@ -830,26 +850,25 @@ window.generateSinglePdf = async function(id) {
                     {
                         width: 170,
                         text: [
-                            { text: 'Data: ', bold: true, fontSize: 11 }, {text: (formatDate(scheda.data) !== '-' ? formatDate(scheda.data) : '') + '\n', fontSize: 11, decoration: 'underline'},
-                            { text: '\nTecnico: ', bold: true, fontSize: 11 }, {text: scheda.tecnico || '', fontSize: 11, decoration: 'underline'}
+                            { text: 'Data: ', bold: true, fontSize: 10 }, {text: (formatDate(scheda.data) !== '-' ? formatDate(scheda.data) : '') + '\n', fontSize: 10, decoration: 'underline'},
+                            { text: '\nTecnico: ', bold: true, fontSize: 10 }, {text: scheda.tecnico || '', fontSize: 10, decoration: 'underline'}
                         ],
-                        margin: [0, 15, 0, 0]
+                        margin: [0, 10, 0, 0]
                     },
                     {
                         width: '*',
                         text: 'Scheda Valutazione Ausili',
                         style: 'documentTitle',
                         alignment: 'center',
-                        margin: [0, 12, 0, 0]
+                        margin: [0, 8, 0, 0]
                     },
                     {
                         width: 170,
-                        ...(logoBase64 ? { image: logoBase64, width: 140, alignment: 'right' } : { text: 'OrtoTek', style: 'logo', alignment: 'right', color: '#3b82f6', margin: [0, 10, 0, 0] })
+                        ...(logoBase64 ? { image: logoBase64, width: 120, alignment: 'right' } : { text: 'OrtoTek', style: 'logo', alignment: 'right', color: '#3b82f6', margin: [0, 5, 0, 0] })
                     }
                 ]
             },
-            { canvas: [{ type: 'line', x1: 0, y1: 10, x2: 760, y2: 10, lineWidth: 2 }] },
-            { text: '\n\n' },
+            { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 780, y2: 5, lineWidth: 1.5 }], margin: [0, 0, 0, 10] },
             // Main body
             {
                 columns: [
@@ -880,45 +899,45 @@ window.generateSinglePdf = async function(id) {
                     // CENTER: Image
                     {
                         width: 250,
-                        ...(imageBase64 ? { image: imageBase64, width: 230, alignment: 'center', margin: [15, -15, 5, 0] } : { text: 'Immagine Schema Non Trovata', alignment: 'center' })
+                        ...(imageBase64 ? { image: imageBase64, width: 200, alignment: 'center', margin: [10, -5, 5, 0] } : { text: 'Immagine Schema Non Trovata', alignment: 'center' })
                     },
                     // RIGHT: Text boxes
                     {
                         width: '*',
                         table: {
                             widths: ['50%', '50%'],
-                            heights: [310],
+                            heights: [280],
                             body: [
                                 [
-                                    { text: [{text: 'Personalizzazioni:\n\n', bold: true, fontSize: 10}, {text: scheda.personalizzazioni || '', fontSize: 10}] },
-                                    { text: [{text: 'Richieste:\n\n', bold: true, fontSize: 10}, {text: scheda.richieste || '', fontSize: 10}] }
+                                    { text: [{text: 'Personalizzazioni:\n\n', bold: true, fontSize: 9}, {text: scheda.personalizzazioni || '', fontSize: 9}] },
+                                    { text: [{text: 'Richieste:\n\n', bold: true, fontSize: 9}, {text: scheda.richieste || '', fontSize: 9}] }
                                 ]
                             ]
                         },
                         layout: {
-                            hLineWidth: function (i, node) { return 2; },
-                            vLineWidth: function (i, node) { return 2; },
+                            hLineWidth: function (i, node) { return 1.5; },
+                            vLineWidth: function (i, node) { return 1.5; },
                             hLineColor: function (i, node) { return 'black'; },
                             vLineColor: function (i, node) { return 'black'; },
                         }
                     }
                 ]
             },
-            { text: '\n' },
+            { text: '\n', fontSize: 4 },
             // BOTTOM: Annotazioni
             {
                 table: {
                     widths: ['*'],
-                    heights: [40],
+                    heights: [35],
                     body: [
                         [
-                            { text: [{text: 'Annotazioni:\n\n', bold: true, fontSize: 10}, {text: scheda.note || '', fontSize: 10}] }
+                            { text: [{text: 'Annotazioni:\n\n', bold: true, fontSize: 9}, {text: scheda.note || '', fontSize: 9}] }
                         ]
                     ]
                 },
                 layout: {
-                    hLineWidth: function (i, node) { return 2; },
-                    vLineWidth: function (i, node) { return 2; },
+                    hLineWidth: function (i, node) { return 1.5; },
+                    vLineWidth: function (i, node) { return 1.5; },
                     hLineColor: function (i, node) { return 'black'; },
                     vLineColor: function (i, node) { return 'black'; },
                 }
@@ -926,11 +945,11 @@ window.generateSinglePdf = async function(id) {
         ],
         styles: {
             documentTitle: {
-                fontSize: 22,
+                fontSize: 18,
                 bold: true
             },
             logo: {
-                fontSize: 24,
+                fontSize: 20,
                 bold: true
             }
         }
