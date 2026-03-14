@@ -25,6 +25,7 @@ const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCancel = document.getElementById('btn-cancel');
 const form = document.getElementById('ausili-form');
 const modalTitle = document.getElementById('modal-title');
+const btnSinglePdf = document.getElementById('btn-single-pdf');
 
 // Form inputs
 const inputId = document.getElementById('card-id');
@@ -183,8 +184,14 @@ function openModal(id = null, readOnly = false) {
             inputPersonalizzazioni.value = scheda.personalizzazioni || '';
             inputRichieste.value = scheda.richieste || '';
             inputNote.value = scheda.note || '';
+            
+            if (btnSinglePdf) {
+                btnSinglePdf.style.display = 'inline-flex';
+                btnSinglePdf.onclick = () => window.generateSinglePdf(scheda.id);
+            }
         }
     } else {
+        if (btnSinglePdf) btnSinglePdf.style.display = 'none';
         modalTitle.textContent = "Nuova Scheda Plantare";
         form.reset();
         inputId.value = '';
@@ -438,12 +445,40 @@ if(btnOpenSchema) {
         if(modalSchema) modalSchema.classList.remove('hidden');
         if(popover) popover.classList.add('hidden');
         updatePinsStatus();
+        updateSchemaCounter();
     });
+}
+
+function countFilledMeasures() {
+    let count = 0;
+    for(let i=1; i<=11; i++) {
+        const val = document.getElementById('misura' + i)?.value;
+        if(val && val.trim() !== '') count++;
+    }
+    return count;
+}
+
+function updateSchemaCounter() {
+    const counterEl = document.getElementById('schema-counter');
+    if (counterEl) {
+        const c = countFilledMeasures();
+        counterEl.textContent = `Misure: ${c}/11`;
+        if (c === 11) {
+            counterEl.style.backgroundColor = 'var(--p-green)';
+            counterEl.style.color = 'white';
+        } else {
+            counterEl.style.backgroundColor = 'var(--p-green-light)';
+            counterEl.style.color = 'var(--p-green-hover)';
+        }
+    }
 }
 
 if(btnCloseSchema) {
     btnCloseSchema.addEventListener('click', () => {
-        if(modalSchema) modalSchema.classList.add('hidden');
+        const count = countFilledMeasures();
+        if(confirm(`Hai inserito ${count} di 11 misure.\nConfermi i dati e vuoi chiudere lo schema?`)) {
+            if(modalSchema) modalSchema.classList.add('hidden');
+        }
     });
 }
 
@@ -460,8 +495,20 @@ function updatePinsStatus() {
     document.querySelectorAll('.schema-pin').forEach(pin => {
         const measureId = pin.getAttribute('data-measure');
         const inputEl = document.getElementById(measureId);
+        
+        let label = pin.querySelector('.pin-value-label');
+        if (label) label.remove();
+
         if(inputEl && inputEl.value && inputEl.value.trim() !== '') {
             pin.classList.add('filled');
+            
+            label = document.createElement('div');
+            label.className = 'pin-value-label';
+            if (measureId === 'misura7') {
+                label.classList.add('label-right');
+            }
+            label.textContent = inputEl.value;
+            pin.appendChild(label);
         } else {
             pin.classList.remove('filled');
         }
@@ -474,6 +521,10 @@ document.querySelectorAll('.schema-pin').forEach(pin => {
         const measureId = pin.getAttribute('data-measure');
         currentPinMeasure = measureId;
         currentPinElement = pin;
+        
+        // Hide red label temporarily while editing
+        const existingLabel = pin.querySelector('.pin-value-label');
+        if (existingLabel) existingLabel.style.display = 'none';
         
         const mainInput = document.getElementById(measureId);
         if(popoverInput) popoverInput.value = mainInput ? mainInput.value : '';
@@ -495,6 +546,7 @@ function savePopover() {
         }
         if(popover) popover.classList.add('hidden');
         updatePinsStatus();
+        updateSchemaCounter();
     }
 }
 
@@ -655,6 +707,264 @@ function exportToPdf() {
     });
 }
 
+// --- Single PDF Export & Share ---
+let base64LogoCache = null;
+
+async function getBase64Logo() {
+    if (base64LogoCache !== null) return base64LogoCache;
+    try {
+        const response = await fetch('logo.png');
+        if (!response.ok) throw new Error('not found');
+        const blob = await response.blob();
+        base64LogoCache = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+        return base64LogoCache;
+    } catch (e) {
+        base64LogoCache = false;
+        return false;
+    }
+}
+
+async function getAnnotatedSchemaBase64(scheda) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            
+            const pins = [
+                {id: 'misura1', x: 0.48, y: 0.43},
+                {id: 'misura2', x: 0.66, y: 0.22},
+                {id: 'misura3', x: 0.20, y: 0.30},
+                {id: 'misura4', x: 0.08, y: 0.30},
+                {id: 'misura5', x: 0.08, y: 0.125},
+                {id: 'misura6', x: 0.91, y: 0.31},
+                {id: 'misura7', x: 0.61, y: 0.98},
+                {id: 'misura8', x: 0.56, y: 0.045},
+                {id: 'misura9', x: 0.185, y: 0.69},
+                {id: 'misura10', x: 0.58, y: 0.72},
+                {id: 'misura11', x: 0.19, y: 0.82}
+            ];
+
+            // Setup per i font
+            ctx.font = 'bold 24px Arial';
+            
+            pins.forEach(pin => {
+                const val = scheda[pin.id];
+                if (val && val.toString().trim() !== '') {
+                    const text = val.toString();
+                    
+                    let px = img.width * pin.x;
+                    let py = img.height * pin.y;
+                    
+                    if (pin.id === 'misura7') {
+                        px += 30; // Destra
+                        py -= 5;
+                    } else {
+                        py += 40; // Sotto
+                    }
+
+                    const metrics = ctx.measureText(text);
+                    const w = metrics.width + 16;
+                    const h = 32;
+                    
+                    let rectX = pin.id === 'misura7' ? px : px - w/2;
+                    let rectY = py - h/2;
+                    
+                    // Box rosso
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(rectX, rectY, w, h);
+                    
+                    // Bordo bianco
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = 'white';
+                    ctx.strokeRect(rectX, rectY, w, h);
+                    
+                    // Testo blu
+                    ctx.fillStyle = 'blue';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(text, rectX + w/2, rectY + h/2 + 2);
+                }
+            });
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = () => resolve(null);
+        img.src = 'schema_misure.png';
+    });
+}
+
+window.generateSinglePdf = async function(id) {
+    const scheda = schede.find(s => s.id === id);
+    if (!scheda) return;
+
+    // Get logo and drawn image
+    const [logoBase64, imageBase64] = await Promise.all([
+        getBase64Logo(),
+        getAnnotatedSchemaBase64(scheda)
+    ]);
+    
+    // Helper per le righe delle misure così son tutte uguali
+    const makeMeasureRow = (label, valueId, unit) => {
+        return [
+            {text: label, fontSize: 9, margin: [0, 5, 0, 5]}, 
+            {text: scheda[valueId] || '         ', alignment: 'center', decoration: 'underline', fontSize: 11, margin: [0, 4, 0, 4]}, 
+            {text: unit, fontSize: 9, margin: [0, 5, 0, 5]}
+        ];
+    };
+
+    const docDefinition = {
+        pageOrientation: 'landscape',
+        pageMargins: [40, 20, 40, 30],
+        content: [
+            // Header
+            {
+                columns: [
+                    {
+                        width: 170,
+                        text: [
+                            { text: 'Data: ', bold: true, fontSize: 11 }, {text: (formatDate(scheda.data) !== '-' ? formatDate(scheda.data) : '') + '\n', fontSize: 11, decoration: 'underline'},
+                            { text: '\nTecnico: ', bold: true, fontSize: 11 }, {text: scheda.tecnico || '', fontSize: 11, decoration: 'underline'}
+                        ],
+                        margin: [0, 15, 0, 0]
+                    },
+                    {
+                        width: '*',
+                        text: 'Scheda Valutazione Ausili',
+                        style: 'documentTitle',
+                        alignment: 'center',
+                        margin: [0, 12, 0, 0]
+                    },
+                    {
+                        width: 170,
+                        ...(logoBase64 ? { image: logoBase64, width: 140, alignment: 'right' } : { text: 'OrtoTek', style: 'logo', alignment: 'right', color: '#3b82f6', margin: [0, 10, 0, 0] })
+                    }
+                ]
+            },
+            { canvas: [{ type: 'line', x1: 0, y1: 10, x2: 760, y2: 10, lineWidth: 2 }] },
+            { text: '\n\n' },
+            // Main body
+            {
+                columns: [
+                    // LEFT: Measures
+                    {
+                        width: 170,
+                        layout: 'noBorders',
+                        table: {
+                            widths: [110, 30, 15],
+                            body: [
+                                makeMeasureRow('Altezza', 'altezza', 'cm'),
+                                makeMeasureRow('Peso', 'peso', 'kg'),
+                                [{text: '\n', colSpan: 3, margin: [0, 3, 0, 3]}, '', ''],
+                                makeMeasureRow('1 - Profondità seduta', 'misura1', 'cm'),
+                                makeMeasureRow('2 - Profondità torace', 'misura2', 'cm'),
+                                makeMeasureRow('3 - Seduta-cavo ascellare', 'misura3', 'cm'),
+                                makeMeasureRow('4 - Altezza spalle', 'misura4', 'cm'),
+                                makeMeasureRow('5 - Spalle-capo', 'misura5', 'cm'),
+                                makeMeasureRow('6 - Seduta-bracciolo', 'misura6', 'cm'),
+                                makeMeasureRow('7 - Tallone-cavo popliteo', 'misura7', 'cm'),
+                                makeMeasureRow('8 - Polso-gomito', 'misura8', 'cm'),
+                                makeMeasureRow('9 - Larghezza spalle', 'misura9', 'cm'),
+                                makeMeasureRow('10 - Larghezza torace', 'misura10', 'cm'),
+                                makeMeasureRow('11 - Larghezza bacino', 'misura11', 'cm')
+                            ]
+                        }
+                    },
+                    // CENTER: Image
+                    {
+                        width: 250,
+                        ...(imageBase64 ? { image: imageBase64, width: 230, alignment: 'center', margin: [15, -15, 5, 0] } : { text: 'Immagine Schema Non Trovata', alignment: 'center' })
+                    },
+                    // RIGHT: Text boxes
+                    {
+                        width: '*',
+                        table: {
+                            widths: ['50%', '50%'],
+                            heights: [310],
+                            body: [
+                                [
+                                    { text: [{text: 'Personalizzazioni:\n\n', bold: true, fontSize: 10}, {text: scheda.personalizzazioni || '', fontSize: 10}] },
+                                    { text: [{text: 'Richieste:\n\n', bold: true, fontSize: 10}, {text: scheda.richieste || '', fontSize: 10}] }
+                                ]
+                            ]
+                        },
+                        layout: {
+                            hLineWidth: function (i, node) { return 2; },
+                            vLineWidth: function (i, node) { return 2; },
+                            hLineColor: function (i, node) { return 'black'; },
+                            vLineColor: function (i, node) { return 'black'; },
+                        }
+                    }
+                ]
+            },
+            { text: '\n' },
+            // BOTTOM: Annotazioni
+            {
+                table: {
+                    widths: ['*'],
+                    heights: [40],
+                    body: [
+                        [
+                            { text: [{text: 'Annotazioni:\n\n', bold: true, fontSize: 10}, {text: scheda.note || '', fontSize: 10}] }
+                        ]
+                    ]
+                },
+                layout: {
+                    hLineWidth: function (i, node) { return 2; },
+                    vLineWidth: function (i, node) { return 2; },
+                    hLineColor: function (i, node) { return 'black'; },
+                    vLineColor: function (i, node) { return 'black'; },
+                }
+            }
+        ],
+        styles: {
+            documentTitle: {
+                fontSize: 22,
+                bold: true
+            },
+            logo: {
+                fontSize: 24,
+                bold: true
+            }
+        }
+    };
+
+    const fileName = `Scheda_Ausili_${(scheda.paziente||'').replace(/\s+/g, '_')}_${scheda.progressivo}.pdf`;
+    const pdfGenerator = pdfMake.createPdf(docDefinition);
+
+    pdfGenerator.getBlob(async (blob) => {
+        // Apriamo sempre prima il pdf in una nuova scheda (apertura/salvataggio locale)
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Proviamo a usare Web Share API in aggiunta (per mobile)
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: `Scheda ${scheda.paziente || ''}`,
+                    text: 'In allegato la scheda di valutazione ausili.'
+                });
+                console.log('Condivisione completata con successo');
+            } catch (err) {
+                console.log('Condivisione annullata', err);
+            }
+        }
+        
+        // Cleanup memory
+        setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+    });
+}
+
 // --- Rendering ---
 function formatDate(dateString) {
     if(!dateString) return '-';
@@ -704,9 +1014,10 @@ function renderCards(filterText = '') {
                     </div>
                 </div>
                 <div class="card-actions">
-                    <button class="btn-icon action-view" onclick="window.viewModal('${scheda.id}')" title="Visualizza"><i class="ph ph-eye"></i></button>
-                    <button class="btn-icon action-edit" onclick="window.editModal('${scheda.id}')" title="Modifica"><i class="ph ph-pencil-simple"></i></button>
-                    <button class="btn-icon action-delete" onclick="window.deleteCard('${scheda.id}')" title="Elimina"><i class="ph ph-trash"></i></button>
+                    <button class="btn-icon action-pdf" onclick="event.stopPropagation(); window.generateSinglePdf('${scheda.id}')" title="Condividi / Scarica PDF"><i class="ph ph-file-pdf" style="color: #ef4444;"></i></button>
+                    <button class="btn-icon action-view" onclick="event.stopPropagation(); window.viewModal('${scheda.id}')" title="Visualizza"><i class="ph ph-eye"></i></button>
+                    <button class="btn-icon action-edit" onclick="event.stopPropagation(); window.editModal('${scheda.id}')" title="Modifica"><i class="ph ph-pencil-simple"></i></button>
+                    <button class="btn-icon action-delete" onclick="event.stopPropagation(); window.deleteCard('${scheda.id}')" title="Elimina"><i class="ph ph-trash"></i></button>
                 </div>
             </div>
             
