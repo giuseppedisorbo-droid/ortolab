@@ -24,6 +24,7 @@ const modal = document.getElementById('modal-card');
 const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCancel = document.getElementById('btn-cancel');
 const form = document.getElementById('ausili-form');
+const modalTitle = document.getElementById('modal-title');
 const btnSinglePdf = document.getElementById('btn-single-pdf');
 const btnSingleDownload = document.getElementById('btn-single-download');
 
