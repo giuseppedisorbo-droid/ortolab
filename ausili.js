@@ -849,8 +849,10 @@ window.generateSinglePdf = async function(id, forceDownload = false) {
     const priorityMeasures = ['misura1', 'misura4', 'misura7', 'misura10', 'misura11'];
     const makeMeasureRow = (label, valueId, unit) => {
         const isPriority = priorityMeasures.includes(valueId);
+        
+        // Se è prioritario, invece di una semplice sottolineatura mettiamo un vero e proprio background giallo
         const labelObj = isPriority 
-            ? {text: label, fontSize: 9, margin: [0, 5, 0, 5], decoration: 'underline', decorationColor: '#eab308'}
+            ? {text: label, fontSize: 9, margin: [0, 5, 0, 5], background: '#fef08a', bold: true}
             : {text: label, fontSize: 9, margin: [0, 5, 0, 5]};
             
         return [
