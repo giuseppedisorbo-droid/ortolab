@@ -864,7 +864,7 @@ window.generateSinglePdf = async function(id) {
                     },
                     {
                         width: 170,
-                        ...(logoBase64 ? { image: logoBase64, width: 120, alignment: 'right' } : { text: 'OrtoTek', style: 'logo', alignment: 'right', color: '#3b82f6', margin: [0, 5, 0, 0] })
+                        ...(logoBase64 ? { image: logoBase64, width: 140, alignment: 'right', margin: [0, -5, 0, 0] } : { text: 'OrtoTek', style: 'logo', alignment: 'right', color: '#3b82f6', margin: [0, 5, 0, 0] })
                     }
                 ]
             },
@@ -981,18 +981,26 @@ window.generateSinglePdf = async function(id) {
         }
         
         // 2. Fallback universale: classico download/salvataggio forzato del browser se il nativo non è supportato/fallisce
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 1000);
+        if (isMobile) {
+            // Se eravamo su mobile e il web share è fallito, proviamo con l'apertura in nuova finestra per safari
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+        } else {
+            // Su PC forziamo solo il download nascosto invisibile
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                if(document.body.contains(a)) document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 1000);
+        }
     });
 }
 
