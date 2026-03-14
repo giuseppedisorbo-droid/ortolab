@@ -991,25 +991,10 @@ window.generateSinglePdf = async function(id) {
             window.open(url, '_blank');
             setTimeout(() => window.URL.revokeObjectURL(url), 5000);
         } else {
-            // Su PC forziamo SOLO il download nascosto invisibile.
+            // Su PC forziamo SOLO il download tramite la funzione nativa sicura di pdfMake.
             // Eliminiamo il menu "Share" Windows 11 nativo, altrimenti Safari/Edge per PC
             // entrano in conflitto bloccando il download effettivo del file PDF sulla macchina.
-            const url = window.URL.createObjectURL(blob);
-            
-            // Crea il pulsante di download nascosto
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            
-            // Eseguiamo il download immediato come file (nella cartella "Download" del PC)
-            a.click();
-            
-            setTimeout(() => {
-                if(document.body.contains(a)) document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 1000);
+            pdfGenerator.download(fileName);
         }
     });
 }
