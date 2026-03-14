@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Plantari | Ortos</title>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icone Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Firebase SDK (Compat Version for simpler integration) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <!-- Librerie per Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <a href="index.html" class="btn-icon" title="Torna al Menu Principale" style="background-color: var(--bg-light);">
+                    <i class="ph ph-arrow-left"></i>
+                </a>
+                <div class="header-logo">
+                    <i class="ph-fill ph-footprints" style="color: var(--p-orange);"></i>
+                    <h1>Gestione Plantari</h1>
+                </div>
+            </div>
+            <div class="header-actions" style="display: flex; gap: 1rem;">
+                <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel">
+                    <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
+                    <span class="desktop-only">Excel</span>
+                </button>
+                <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF">
+                    <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
+                    <span class="desktop-only">PDF</span>
+                </button>
+                <button id="btn-new-card" class="btn btn-primary">
+                    <i class="ph ph-plus-circle"></i>
+                    <span>Nuova Scheda</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="search-input" placeholder="Cerca Paziente o Codice...">
+                </div>
+            </div>
+
+            <!-- Griglia Schede -->
+            <div id="cards-grid" class="cards-grid">
+                <!-- Cards iniettate da JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modal-card" class="modal-overlay hidden">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2 id="modal-title">Nuova Scheda Plantare</h2>
+                <button id="btn-close-modal" class="btn-icon"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="plantari-form">
+                    <input type="hidden" id="card-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="progressivo">N. Progressivo</label>
+                            <input type="number" id="progressivo" required placeholder="Es. 30">
+                        </div>
+                        <div class="form-group flex-2">
+                            <label for="paziente">Cognome Nome</label>
+                            <input type="text" id="paziente" required placeholder="Es. Rossi Mario">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="data-ordine">Data</label>
+                            <input type="date" id="data-ordine" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="misura">Numero Calzata</label>
+                            <input type="text" id="misura" placeholder="Es. 42">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="schiuma">Schiuma</label>
+                            <input type="text" id="schiuma" placeholder="Es. 123">
+                        </div>
+                        <div class="form-group flex-2">
+                            <label for="codice">Codice Plantare</label>
+                            <input type="text" id="codice" placeholder="Es. COR 1366X2" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="rivestimento">Rivestimento</label>
+                            <select id="rivestimento">
+                                <option value=""></option>
+                                <option value="SI">SI</option>
+                                <option value="NO">NO</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="pellami">Pellami</label>
+                            <select id="pellami">
+                                <option value=""></option>
+                                <option value="SI">SI</option>
+                                <option value="NO">NO</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="interi-mezzo">Plantari Interi/Mezzo</label>
+                            <select id="interi-mezzo">
+                                <option value=""></option>
+                                <optgroup label="Interi In Lattice">
+                                    <option value="35L">35L</option>
+                                </optgroup>
+                                <optgroup label="Mezzo Plantare In Lattice">
+                                    <option value="32/1L">32/1L</option>
+                                    <option value="32/2L">32/2L</option>
+                                    <option value="32/3L">32/3L</option>
+                                    <option value="10L">10L</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="scarico">Scarico Calca.</label>
+                            <select id="scarico">
+                                <option value=""></option>
+                                <option value="31/1L">31/1L</option>
+                                <option value="31/2L">31/2L</option>
+                                <option value="31/3L">31/3L</option>
+                                <option value="34/1L">34/1L</option>
+                                <option value="34/2L">34/2L</option>
+                                <option value="37L">37L</option>
+                                <option value="38L">38L</option>
+                                <option value="39L">39L</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="sostegno-met">Sostegno Met.</label>
+                            <select id="sostegno-met">
+                                <option value=""></option>
+                                <optgroup label="Oliva">
+                                    <option value="1L">1L</option>
+                                    <option value="2L">2L</option>
+                                    <option value="3L">3L</option>
+                                    <option value="267/1L">267/1L</option>
+                                    <option value="267/2L">267/2L</option>
+                                    <option value="267/3L">267/3L</option>
+                                    <option value="18L">18L</option>
+                                    <option value="19L">19L</option>
+                                    <option value="20L">20L</option>
+                                    <option value="21L">21L</option>
+                                    <option value="49L">49L</option>
+                                    <option value="50L">50L</option>
+                                    <option value="51L">51L</option>
+                                    <option value="52L">52L</option>
+                                </optgroup>
+                                <optgroup label="Barra">
+                                    <option value="8L">8L</option>
+                                    <option value="9L">9L</option>
+                                    <option value="903/1L">903/1L</option>
+                                    <option value="903/2L">903/2L</option>
+                                    <option value="903/4L">903/4L</option>
+                                    <option value="22L">22L</option>
+                                    <option value="23L">23L</option>
+                                    <option value="24L">24L</option>
+                                    <option value="25L">25L</option>
+                                    <option value="6L">6L</option>
+                                    <option value="7L">7L</option>
+                                    <option value="305LR">305LR</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="sostegno-volte">Sostegno Met Volte Long.</label>
+                            <select id="sostegno-volte">
+                                <option value=""></option>
+                                <option value="12L">12L</option>
+                                <option value="13L">13L</option>
+                                <option value="14L">14L</option>
+                                <option value="15L">15L</option>
+                                <option value="16L">16L</option>
+                                <option value="17L">17L</option>
+                                <option value="53L">53L</option>
+                                <option value="54L">54L</option>
+                                <option value="55L">55L</option>
+                                <option value="56L">56L</option>
+                                <option value="44L">44L</option>
+                                <option value="45L">45L</option>
+                                <option value="46L">46L</option>
+                                <option value="47L">47L</option>
+                                <option value="48L">48L</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="piano-inc">Piano Inclinato</label>
+                        <select id="piano-inc">
+                            <option value=""></option>
+                            <option value="60L">60L</option>
+                            <option value="80/1L">80/1L</option>
+                            <option value="80/2L">80/2L</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="note">Note</label>
+                        <textarea id="note" rows="2" placeholder="Note aggiuntive..."></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="btn-cancel" class="btn btn-secondary">Annulla</button>
+                        <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> Salva Scheda</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

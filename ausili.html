@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valutazione Ausili | OrtLab</title>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icone Phosphor -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Firebase SDK (Compat Version for simpler integration) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <!-- Librerie per Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <a href="index.html" class="btn-icon" title="Torna al Menu Principale" style="background-color: var(--bg-light);">
+                    <i class="ph ph-arrow-left"></i>
+                </a>
+                <div class="header-logo">
+                    <i class="ph-fill ph-wheelchair" style="color: var(--p-orange);"></i>
+                    <h1>Valutazione Ausili</h1>
+                </div>
+            </div>
+            <div class="header-actions" style="display: flex; gap: 1rem;">
+                <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel">
+                    <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
+                    <span class="desktop-only">Excel</span>
+                </button>
+                <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF">
+                    <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
+                    <span class="desktop-only">PDF</span>
+                </button>
+                <button id="btn-new-card" class="btn btn-primary">
+                    <i class="ph ph-plus-circle"></i>
+                    <span>Nuova Valutazione</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="controls-bar">
+                <div class="search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="search-input" placeholder="Cerca Paziente o Codice...">
+                </div>
+            </div>
+
+            <!-- Griglia Schede -->
+            <div id="cards-grid" class="cards-grid">
+                <!-- Cards iniettate da JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modal-card" class="modal-overlay hidden">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2 id="modal-title">Nuova Scheda Valutazione Ausili</h2>
+                <button id="btn-close-modal" class="btn-icon"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="ausili-form">
+                    <input type="hidden" id="card-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="progressivo">N. Progressivo</label>
+                            <input type="number" id="progressivo" required placeholder="Es. 30">
+                        </div>
+                        <div class="form-group flex-2">
+                            <label for="paziente">Paziente / Utente</label>
+                            <input type="text" id="paziente" required placeholder="Es. Rossi Mario">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="data-ordine">Data</label>
+                            <input type="date" id="data-ordine" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group flex-2">
+                            <label for="tecnico">Tecnico</label>
+                            <input type="text" id="tecnico" placeholder="Es. Bianchi Luca">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="altezza">Altezza (cm)</label>
+                            <input type="number" step="0.1" id="altezza" placeholder="Es. 175">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="peso">Peso (kg)</label>
+                            <input type="number" step="0.1" id="peso" placeholder="Es. 70">
+                        </div>
+                    </div>
+
+                    <!-- Misure -->
+                    <h3 style="margin: 1.5rem 0 1rem; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Misure (cm)</h3>
+                    <div class="form-row">
+                        <div class="form-group flex-1"><label for="misura1">1 - Profondità seduta</label><input type="number" step="0.1" id="misura1"></div>
+                        <div class="form-group flex-1"><label for="misura2">2 - Profondità torace</label><input type="number" step="0.1" id="misura2"></div>
+                        <div class="form-group flex-1"><label for="misura3">3 - Seduta-cavo ascellare</label><input type="number" step="0.1" id="misura3"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1"><label for="misura4">4 - Altezza spalle</label><input type="number" step="0.1" id="misura4"></div>
+                        <div class="form-group flex-1"><label for="misura5">5 - Spalle-capo</label><input type="number" step="0.1" id="misura5"></div>
+                        <div class="form-group flex-1"><label for="misura6">6 - Seduta-bracciolo</label><input type="number" step="0.1" id="misura6"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1"><label for="misura7">7 - Tallone-cavo popliteo</label><input type="number" step="0.1" id="misura7"></div>
+                        <div class="form-group flex-1"><label for="misura8">8 - Polso-gomito</label><input type="number" step="0.1" id="misura8"></div>
+                        <div class="form-group flex-1"><label for="misura9">9 - Larghezza spalle</label><input type="number" step="0.1" id="misura9"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1"><label for="misura10">10 - Larghezza torace</label><input type="number" step="0.1" id="misura10"></div>
+                        <div class="form-group flex-1"><label for="misura11">11 - Larghezza bacino</label><input type="number" step="0.1" id="misura11"></div>
+                        <div class="form-group flex-1"></div>
+                    </div>
+
+                    <h3 style="margin: 1.5rem 0 1rem; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Personalizzazioni e Richieste</h3>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="personalizzazioni">Personalizzazioni</label>
+                            <textarea id="personalizzazioni" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="richieste">Richieste</label>
+                            <textarea id="richieste" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="note">Annotazioni</label>
+                        <textarea id="note" rows="2" placeholder="Note aggiuntive..."></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="btn-cancel" class="btn btn-secondary">Annulla</button>
+                        <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> Salva Valutazione</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="ausili.js"></script>
+</body>
+</html>
