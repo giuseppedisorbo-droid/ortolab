@@ -961,8 +961,11 @@ window.generateSinglePdf = async function(id) {
     pdfGenerator.getBlob(async (blob) => {
         const file = new File([blob], fileName, { type: 'application/pdf' });
         
-        // 1. Prova prima con la Web Share API nativa (per iOS/Android: WhatsApp, Mail, Salva File)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Verifica se siamo su un dispositivo mobile usando il touch screen o user agent
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+        
+        // 1. Prova prima con la Web Share API nativa (SOLO su Mobile = WhatsApp, Mail, Salva File)
+        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
                 await navigator.share({
                     files: [file],
