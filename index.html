@@ -3,129 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scegli Applicazione | OrtLab</title>
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Icone Phosphor -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <title>Raw Data Entry | EUBIOTECH</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- Firebase SDK (Compat Version for simpler integration) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+    
     <link rel="stylesheet" href="style.css">
-    <style>
-        .home-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background: linear-gradient(135deg, var(--bg-light) 0%, #e5e7eb 100%);
-        }
-        
-        .main-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-main);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .sub-title {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            margin-bottom: 3.5rem;
-            text-align: center;
-        }
-
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 700px;
-        }
-
-        .app-launch-card {
-            background-color: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 3rem 2rem;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text-main);
-            box-shadow: var(--shadow-md);
-            transition: var(--transition);
-            border: 2px solid transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .app-launch-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .app-launch-card i {
-            font-size: 4.5rem;
-            transition: var(--transition);
-        }
-
-        .app-launch-card h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        /* Varienti Colore */
-        .card-plantari {
-            border-color: rgba(16, 185, 129, 0.1);
-        }
-        .card-plantari:hover {
-            border-color: var(--p-green);
-        }
-        .card-plantari i {
-            color: var(--p-green);
-        }
-        .card-plantari:hover i {
-            transform: scale(1.1);
-        }
-
-        .card-ausili {
-            border-color: rgba(249, 115, 22, 0.1);
-        }
-        .card-ausili:hover {
-            border-color: var(--p-orange);
-        }
-        .card-ausili i {
-            color: var(--p-orange);
-        }
-        .card-ausili:hover i {
-            transform: scale(1.1);
-        }
-    </style>
 </head>
 <body>
-    <div class="home-container">
-        
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <i class="ph-fill ph-infinity" style="font-size: 4rem; color: var(--text-muted); opacity: 0.5;"></i>
-        </div>
+    <div class="container">
+        <header>
+            <h1>EUBIOTECH</h1>
+            <p>ver 1.0</p>
+        </header>
 
-        <h1 class="main-title">Benvenuto in OrtoTek Lab</h1>
-        <p class="sub-title">Seleziona l'ambiente di lavoro per iniziare</p>
-        
-        <div class="apps-grid">
-            <a href="plantari.html" class="app-launch-card card-plantari">
-                <i class="ph-fill ph-footprints"></i>
-                <h2>Gestione Plantari</h2>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">Archivio e schede lavorazione plantari su misura.</p>
-            </a>
+        <section class="form-section">
+            <h2>Aggiungi Nuovo Record</h2>
+            <form id="data-entry-form">
+                <div class="form-group">
+                    <label for="date-input">Data</label>
+                    <input type="date" id="date-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="type-input">Tipo (Sezione)</label>
+                    <select id="type-input" required>
+                        <option value="REVENUE_EUBIOS">RICAVI EUBIOS</option>
+                        <option value="COSTS_EUBIOS">COSTI EUBIOS</option>
+                        <option value="REVENUE_EUBIOTECH">RICAVI EUBIOTECH</option>
+                        <option value="COGS_TECH">COSTI PERSONALE EUBIOTECH</option>
+                        <option value="OPEX_TECH">ALTRI COSTI EUBIOTECH</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="category-input">Categoria</label>
+                    <select id="category-input" required>
+                        <option value="" disabled selected>Caricamento categorie in corso...</option>
+                        <option value="altro">+ Aggiungi nuova voce...</option>
+                    </select>
+                    <input type="text" id="custom-category-input" placeholder="Specifica nuova categoria..." style="display:none; margin-top: 5px;">
+                </div>
+
+                <div class="form-group">
+                    <label for="description-input">Descrizione (Opzionale)</label>
+                    <input type="text" id="description-input" placeholder="Dettaglio aggiuntivo">
+                </div>
+
+                <div class="form-group">
+                    <label for="amount-input">Importo (€)</label>
+                    <input type="number" id="amount-input" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="attachment-input">Allegato (PDF/Immagine - Opzionale)</label>
+                    <input type="file" id="attachment-input" accept="image/*,.pdf">
+                    <div id="upload-progress" style="display: none; font-size: 0.85em; color: #3b82f6; margin-top: 5px;">Caricamento in corso: <span id="upload-percent">0</span>%</div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="submit-btn" class="btn">Salva Record</button>
+                    <button type="button" id="cancel-edit-btn" class="btn btn-outline" style="display: none; border-color: var(--danger); color: var(--danger);">Annulla Modifica</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="filters-section">
+            <div style="border-bottom: 2px solid var(--border-color); margin-bottom: 1.5rem; padding-bottom: 0.5rem;">
+                <h2 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Analisi e Filtri</h2>
+            </div>
             
-            <a href="ausili.html" class="app-launch-card card-ausili">
-                <i class="ph-fill ph-wheelchair"></i>
-                <h2>Valutazione Ausili</h2>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">Schede di misurazione e personalizzazione per ausili.</p>
-            </a>
+            <div id="filter-grid-container" class="filter-grid" style="display: none;">
+                <div class="filter-box">
+                    <label>Filtra per Anno</label>
+                    <div id="year-filters" class="checkbox-group">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="filter-box">
+                    <label>Filtra per Mese / Trimestre</label>
+                    <div class="quick-selects">
+                        <button type="button" class="btn-small" data-q="1">Q1</button>
+                        <button type="button" class="btn-small" data-q="2">Q2</button>
+                        <button type="button" class="btn-small" data-q="3">Q3</button>
+                        <button type="button" class="btn-small" data-q="4">Q4</button>
+                        <button type="button" class="btn-small btn-outline" id="sel-all-months">Tutti</button>
+                    </div>
+                    <div id="month-filters" class="checkbox-group grid-months">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="filter-box">
+                    <label>Filtra per Tipo</label>
+                    <div id="type-filters" class="checkbox-group">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="filter-box" style="grid-column: 1 / -1;">
+                    <label>Filtra per Categoria</label>
+                    <div class="quick-selects">
+                        <button type="button" class="btn-small btn-outline" id="sel-all-categories">Tutte</button>
+                        <button type="button" class="btn-small btn-outline" id="desel-all-categories">Nessuna</button>
+                    </div>
+                    <div id="category-filters" class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- EUBIOS ROW -->
+                <div>
+                    <h3 style="margin-bottom: 0.5rem; color: #3b82f6; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem;">Riepilogo Eubios</h3>
+                    <div class="summary-cards">
+                        <div class="summary-card card-revenue">
+                            <div class="card-title" id="title-revenue-eubios">Ricavi Eubios</div>
+                            <div class="card-value" id="sum-revenue-eubios">€ 0,00</div>
+                        </div>
+                        <div class="summary-card" style="background-color: #fef2f2; border: 1px solid #fecdd3;">
+                            <div class="card-title" id="title-costs-eubios" style="color: #be123c;">Costi Eubios</div>
+                            <div class="card-value" id="sum-costs-eubios" style="color: #9f1239;">€ 0,00</div>
+                        </div>
+                        <div class="summary-card card-profit-eubios">
+                            <div class="card-title" id="title-profit-eubios">Utile Eubios</div>
+                            <div class="card-value" id="sum-profit-eubios">€ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EUBIOTECH ROW -->
+                <div>
+                    <h3 style="margin-bottom: 0.5rem; color: #8b5cf6; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem;">Riepilogo Eubiotech</h3>
+                    <div class="summary-cards">
+                        <div class="summary-card card-revenue-tech">
+                            <div class="card-title" id="title-revenue-tech">Ricavi Eubiotech</div>
+                            <div class="card-value" id="sum-revenue-tech">€ 0,00</div>
+                        </div>
+                        <div class="summary-card card-cogs">
+                            <div class="card-title" id="title-cogs">Salari e Stipendi</div>
+                            <div class="card-value" id="sum-cogs">€ 0,00</div>
+                        </div>
+                        <div class="summary-card card-opex">
+                            <div class="card-title" id="title-opex">Costi altri Eubiotech</div>
+                            <div class="card-value" id="sum-opex">€ 0,00</div>
+                        </div>
+                        <div class="summary-card card-profit-tech">
+                            <div class="card-title" id="title-profit-tech">Utile Eubiotech</div>
+                            <div class="card-value" id="sum-profit-tech">€ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="data-section">
+            <div class="data-header">
+                <div style="flex-grow: 1; display: flex; align-items: center; justify-content: flex-start; margin-right: 20px;">
+                    <label style="margin-bottom: 0; margin-right: 10px; font-weight: bold; white-space: nowrap;">Vedi tabella:</label>
+                    <div style="display: flex; flex-direction: column; gap: 5px; margin-right: 20px;">
+                        <select id="group-by-select" style="padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; max-width: 250px;">
+                            <option value="none">Dettaglio Singoli Record</option>
+                            <option value="year" selected>Per Anno (Confronto Totali)</option>
+                            <option value="quarter">Per Trimestre</option>
+                            <option value="month">Per Mese</option>
+                            <option value="week">Per Settimana</option>
+                            <option value="day">Per Giorno</option>
+                            <option value="type">Per Tipo (Ricavi vs Costi)</option>
+                            <option value="category">Per Categoria</option>
+                            <option value="description">Per Descrizione</option>
+                            <option value="custom_group">Per Raggruppamento Causale</option>
+                        </select>
+                        <button id="iphone-view-btn" class="btn-small btn-outline" style="align-self: flex-start; margin-top: 2px;">📱 iPhone</button>
+                    </div>
+                    <div style="position: relative; display: flex; align-items: center; max-width: 300px; min-width: 200px; width: 100%; margin-right: 15px;">
+                        <span style="position: absolute; left: 10px; font-size: 1.2em; color: #94a3b8; pointer-events: none;">🔍</span>
+                        <input type="text" id="global-search-input" placeholder="Cerca voci (usa AND / OR)..." style="padding: 8px 8px 8px 35px; border-radius: 4px; border: 1px solid #cbd5e1; width: 100%;">
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <!-- Hidden file input for "Costi Extra" import -->
+                    <input type="file" id="import-extra-file" accept=".xlsx, .xls" style="display: none;" />
+                    <!-- Hidden file input for full JSON backup -->
+                    <input type="file" id="import-backup-file" accept=".json" style="display: none;" />
+                    
+                    <div class="action-dropdown" style="position: relative; display: inline-block;">
+                        <button id="actions-menu-btn" class="btn" style="background-color: #475569; display: flex; align-items: center; gap: 8px;">
+                            ⚙️ Azioni Dati Dbase <span style="font-size: 0.8em;">▼</span>
+                        </button>
+                        <div id="actions-dropdown-content" class="action-dropdown-content" style="padding: 0; gap: 0; overflow: hidden; border: 1px solid #cbd5e1;">
+                            <button type="button" id="toggle-filters-btn" class="btn-tight" style="background-color: #64748b; color: white;">👁️ Mostra/Nascondi Filtri</button>
+                            <button id="clear-filters-btn" class="btn-tight" style="background-color: #f43f5e; color: white;">✖ Cancella Filtri Attivi</button>
+                            
+                            <hr style="border: 0; height: 1px; background: white; margin: 0;">
+                            <button id="settings-btn" class="btn-tight" style="background-color: #0f172a; color: white;">⚙️ Impostazioni Causali</button>
+                            
+                            <hr style="border: 0; height: 1px; background: white; margin: 0;">
+                            
+                            <button id="import-extra-btn" class="btn-tight" style="background-color: #8b5cf6; color: white;">✚ Importa Costi Extra (Excel)</button>
+                            <button id="export-backup-btn" class="btn-tight" style="background-color: #3b82f6; color: white;">⬇️ Esporta Backup</button>
+                            <button id="import-backup-btn" class="btn-tight" style="background-color: #10b981; color: white;">⬆️ Importa Backup</button>
+                            
+                            <hr style="border: 0; height: 1px; background: white; margin: 0;">
+                            
+                            <button id="load-backup-btn" class="btn-tight" style="background-color: #f59e0b; color: white;">Carica Dati Base Excel</button>
+                            <button id="clear-all-btn" class="btn-tight" style="background-color: #ef4444; color: white;">Cancella Tutto</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="active-filters-container" style="width: 100%; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 15px; padding: 12px 15px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <span style="font-size: 0.85em; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Filtri Attivi:</span>
+                    <div id="active-filters-list" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                        <span style="font-size: 0.85em; color: #94a3b8; font-style: italic;">Nessun filtro applicato. Verranno mostrati tutti i dati non raggruppati.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Descrizione</th>
+                            <th>Importo (€)</th>
+                            <th>Allegato</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-body">
+                        <!-- Entries will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="category-popover" class="popover hidden">
+        <div class="popover-header">
+            <h4>Filtra Causali</h4>
+            <button id="close-popover" class="close-btn">&times;</button>
+        </div>
+        <div class="popover-actions">
+            <button id="popover-sel-all" class="btn-small btn-outline">Seleziona tutte</button>
+            <button id="popover-desel-all" class="btn-small btn-outline">Deseleziona tutte</button>
+        </div>
+        <div id="popover-content" class="checkbox-group popover-checkboxes">
+            <!-- Checkboxes injected here -->
         </div>
     </div>
+
+    <!-- Custom Context Menu for table rows -->
+    <div id="row-context-menu" class="context-menu" style="display: none;">
+        <ul>
+            <li id="ctx-edit">✏️ Modifica</li>
+            <li id="ctx-delete" style="color: var(--danger);">🗑️ Elimina</li>
+        </ul>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Gestione Causali (Raggruppamenti Personalizzati)</h3>
+                <button id="close-settings-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.9em; color: #64748b; margin-bottom: 15px;">
+                    Crea dei raggruppamenti personalizzati (es. "Spese Auto") e scegli quali Tipi, Categorie e Descrizioni includere spuntando le caselle sottostanti.
+                </p>
+
+                <!-- Elenco Raggruppamenti Esistenti -->
+                <div id="settings-groups-list" style="margin-bottom: 20px;">
+                    <h4>Raggruppamenti Attuali:</h4>
+                    <div id="custom-groups-container" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <hr style="border: 0; height: 1px; background: #e2e8f0; margin: 20px 0;">
+
+                <!-- Form Creazione/Modifica Raggruppamento -->
+                <div id="settings-form-area">
+                    <h4 id="settings-form-title">Crea Nuovo Raggruppamento</h4>
+                    <div class="form-group">
+                        <label for="new-group-name">Nome Raggruppamento</label>
+                        <input type="text" id="new-group-name" placeholder="Es. Spese di Viaggio" style="width: 100%;">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                        <div>
+                            <label style="font-weight: 600; margin-bottom: 5px; display:block;">Seleziona Tipi</label>
+                            <div id="settings-types-container" class="checkbox-group" style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
+                                <!-- Checkboxes Injected by JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; margin-bottom: 5px; display:block;">Seleziona Categorie</label>
+                            <div id="settings-categories-container" class="checkbox-group" style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
+                                <!-- Checkboxes Injected by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <label style="font-weight: 600; margin-bottom: 5px; display:block;">Seleziona Descrizioni (Opzionale)</label>
+                        <div id="settings-descriptions-container" class="checkbox-group" style="max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; display: grid; grid-template-columns: 1fr 1fr;">
+                            <!-- Checkboxes Injected by JS -->
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button id="cancel-group-btn" class="btn-outline" style="display:none;">Annulla Modifica</button>
+                        <button id="save-group-btn" class="btn" style="background: #10b981; color: white;">Salva Raggruppamento</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js?v=5"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>
