@@ -406,6 +406,28 @@ body {
     background-color: #f9fafb;
 }
 
+/* Stili Disabilitati (Read-Only) */
+.form-group input:disabled, 
+.form-group select:disabled, 
+.form-group textarea:disabled {
+    background-color: transparent;
+    border-color: transparent;
+    color: #111827; /* Nero forte per alto contrasto */
+    font-weight: 600;
+    -webkit-text-fill-color: #111827; /* Forza colore su Safari/Chrome */
+    opacity: 1; /* Impedisce che i browser lo sbianchino */
+    padding: 0.5rem 0; /* Rimuove padding per allineare il testo */
+    box-shadow: none;
+    cursor: default;
+}
+
+/* Fix per nascondere l'icona a tendina disabilitata sui select */
+.form-group select:disabled {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
 .form-group input:focus, 
 .form-group select:focus, 
 .form-group textarea:focus {
@@ -426,6 +448,13 @@ body {
     gap: 1rem;
     border-top: 1px solid var(--border-color);
     padding-top: 1.5rem;
+}
+
+/* Responsive Hide */
+@media (max-width: 640px) {
+    .desktop-only {
+        display: none;
+    }
 }
 
 /* Empty State */

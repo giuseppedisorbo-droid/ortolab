@@ -5,6 +5,8 @@ let schede = [];
 const grid = document.getElementById('cards-grid');
 const searchInput = document.getElementById('search-input');
 const btnNewCard = document.getElementById('btn-new-card');
+const btnExportExcel = document.getElementById('btn-export-excel');
+const btnExportPdf = document.getElementById('btn-export-pdf');
 const modal = document.getElementById('modal-card');
 const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCancel = document.getElementById('btn-cancel');
@@ -88,6 +90,8 @@ function generateId() {
 // --- Event Listeners ---
 function setupEventListeners() {
     btnNewCard.addEventListener('click', () => openModal());
+    btnExportExcel.addEventListener('click', exportToExcel);
+    btnExportPdf.addEventListener('click', exportToPdf);
     btnCloseModal.addEventListener('click', closeModal);
     btnCancel.addEventListener('click', closeModal);
     
@@ -201,6 +205,138 @@ window.deleteCard = function(id) {
 window.openModal = openModal;
 window.viewModal = function(id) { openModal(id, true); };
 window.editModal = function(id) { openModal(id, false); };
+
+// --- Export Functions ---
+function exportToExcel() {
+    if(schede.length === 0) {
+        alert("Nessun dato da esportare.");
+        return;
+    }
+    
+    // Mappa per tradurre chiavi in intestazioni belle
+    const dataToExport = schede.map(s => ({
+        "N. Progressivo": s.progressivo,
+        "Data": s.data,
+        "Cognome Nome": s.paziente,
+        "Numero Calzata": s.misura,
+        "Schiuma": s.schiuma,
+        "Codice Plantare": s.codice,
+        "Rivestimento": s.rivestimento,
+        "Pellami": s.pellami,
+        "Plantari Interi/Mezzo": s.interiMezzo,
+        "Scarico Calca.": s.scarico,
+        "Sostegno Met.": s.sostegnoMet,
+        "Sostegno Volte": s.sostegnoVolte,
+        "Piano Inclinato": s.pianoInc,
+        "Note": s.note
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Plantari");
+    
+    // Genera nome file
+    const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `Archivio_Plantari_${dateStr}.xlsx`;
+    
+    // Scrittura in buffer array
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+    // Crea Blob e simula un click per il download (Fix per iOS/Mobile)
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function exportToPdf() {
+    if(schede.length === 0) {
+        alert("Nessun dato da esportare.");
+        return;
+    }
+    
+    const tableBody = [
+        [
+            {text: 'Prog.', style: 'tableHeader'},
+            {text: 'Data', style: 'tableHeader'},
+            {text: 'Paziente', style: 'tableHeader'},
+            {text: 'Misura', style: 'tableHeader'},
+            {text: 'Codice', style: 'tableHeader'},
+            {text: 'Riv/Pell', style: 'tableHeader'},
+            {text: 'Interi/Mezzo', style: 'tableHeader'},
+            {text: 'Scarico', style: 'tableHeader'},
+            {text: 'Sost. Met', style: 'tableHeader'},
+            {text: 'Volte', style: 'tableHeader'}
+        ]
+    ];
+    
+    schede.forEach(s => {
+        tableBody.push([
+            s.progressivo?.toString() || '',
+            s.data || '',
+            s.paziente || '',
+            s.misura || '',
+            s.codice || '',
+            (s.rivestimento || '') + '/' + (s.pellami || ''),
+            s.interiMezzo || '',
+            s.scarico || '',
+            s.sostegnoMet || '',
+            s.sostegnoVolte || ''
+        ]);
+    });
+
+    const docDefinition = {
+        pageOrientation: 'landscape',
+        content: [
+            { text: 'Archivio Gestione Plantari', style: 'header' },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    body: tableBody
+                }
+            }
+        ],
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true,
+                margin: [0, 0, 0, 10]
+            },
+            tableHeader: {
+                bold: true,
+                fontSize: 11,
+                color: 'black',
+                fillColor: '#f3f4f6'
+            }
+        },
+        defaultStyle: {
+            fontSize: 9
+        }
+    };
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `Archivio_Plantari_${dateStr}.pdf`;
+
+    const pdfGenerator = pdfMake.createPdf(docDefinition);
+    
+    // Specifica il download tramite Blob per compatibilità Mobile iOS/Safari
+    pdfGenerator.getBlob((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    });
+}
 
 // --- Rendering ---
 function formatDate(dateString) {
