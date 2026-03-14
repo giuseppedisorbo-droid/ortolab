@@ -991,8 +991,9 @@ window.generateSinglePdf = async function(id) {
             window.open(url, '_blank');
             setTimeout(() => window.URL.revokeObjectURL(url), 5000);
         } else {
-            // Su PC: proviamo con Web Share ma chiediamo all'utente cosa preferisce fare (poiché Share su PC è incompleto)
-            // Se PC supporta Share, diamo una doppia opzione inviando il download comunque in background
+            // Su PC forziamo SOLO il download nascosto invisibile.
+            // Eliminiamo il menu "Share" Windows 11 nativo, altrimenti Safari/Edge per PC
+            // entrano in conflitto bloccando il download effettivo del file PDF sulla macchina.
             const url = window.URL.createObjectURL(blob);
             
             // Crea il pulsante di download nascosto
@@ -1002,28 +1003,13 @@ window.generateSinglePdf = async function(id) {
             a.download = fileName;
             document.body.appendChild(a);
             
-            // Eseguiamo un download immediato come file
+            // Eseguiamo il download immediato come file (nella cartella "Download" del PC)
             a.click();
-            
-            // Proviamo a triggerare anche la condivisione se esiste (per mail/whatsapp)
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                setTimeout(async () => {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: `Scheda ${scheda.paziente || ''}`,
-                            text: 'In allegato la scheda di valutazione ausili.'
-                        });
-                    } catch (e) {
-                        console.log("Share annulato", e);
-                    }
-                }, 500); // Ritardo per dare precedenza al download
-            }
             
             setTimeout(() => {
                 if(document.body.contains(a)) document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-            }, 5000);
+            }, 1000);
         }
     });
 }
