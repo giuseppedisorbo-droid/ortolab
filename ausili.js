@@ -959,13 +959,9 @@ window.generateSinglePdf = async function(id) {
     const pdfGenerator = pdfMake.createPdf(docDefinition);
 
     pdfGenerator.getBlob(async (blob) => {
-        // Apriamo sempre prima il pdf in una nuova scheda (apertura/salvataggio locale)
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        
-        // Proviamo a usare Web Share API in aggiunta (per mobile)
         const file = new File([blob], fileName, { type: 'application/pdf' });
         
+        // 1. Prova prima con la Web Share API nativa (per iOS/Android: WhatsApp, Mail, Salva File)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
                 await navigator.share({
@@ -973,14 +969,27 @@ window.generateSinglePdf = async function(id) {
                     title: `Scheda ${scheda.paziente || ''}`,
                     text: 'In allegato la scheda di valutazione ausili.'
                 });
-                console.log('Condivisione completata con successo');
+                console.log('Condivisione nativa completata con successo');
+                return; // Fermati qua se l'utente ha utilizzato con successo il menu nativo
             } catch (err) {
-                console.log('Condivisione annullata', err);
+                console.log('Condivisione annullata dal menu nativo o fallita:', err);
+                // Non blocchiamo, andiamo al fallback
             }
         }
         
-        // Cleanup memory
-        setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+        // 2. Fallback universale: classico download/salvataggio forzato del browser se il nativo non è supportato/fallisce
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 1000);
     });
 }
 
