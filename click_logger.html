@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; padding: 0; background: #fafafa; text-align: left; }
+  #container { position: relative; display: inline-block; }
+  img { width: 100%; display: block; }
+  .dot { position: absolute; width: 6px; height: 6px; background: red; border-radius: 50%; transform: translate(-50%, -50%); }
+</style>
+</head>
+<body>
+<div id="container">
+  <img src="schema_misure.png" id="img">
+  <script>
+    const cont = document.getElementById('container');
+    const coords = [];
+    cont.addEventListener('click', function(e) {
+      if(e.target !== document.getElementById('img')) return;
+      const rect = cont.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+      const pctX = (x / rect.width * 100).toFixed(1);
+      const pctY = (y / rect.height * 100).toFixed(1);
+      coords.push({ top: pctY, left: pctX });
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.style.left = pctX + '%';
+      d.style.top = pctY + '%';
+      cont.appendChild(d);
+      
+      const debug = document.createElement('div');
+      debug.id = "output";
+      debug.innerHTML = coords.map((c, i) => `${i+1}: top: ${c.top}%, left: ${c.left}%`).join('<br>');
+      document.body.appendChild(debug);
+    });
+  </script>
+</div>
+</body>
+</html>
