@@ -8,6 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Icone Phosphor -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Librerie per Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,10 +22,20 @@
                 <i class="ph-fill ph-footprints" style="color: var(--p-orange);"></i>
                 <h1>Gestione Plantari</h1>
             </div>
-            <button id="btn-new-card" class="btn btn-primary">
-                <i class="ph ph-plus-circle"></i>
-                Nuova Scheda
-            </button>
+            <div class="header-actions" style="display: flex; gap: 1rem;">
+                <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel">
+                    <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
+                    <span class="desktop-only">Excel</span>
+                </button>
+                <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF">
+                    <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
+                    <span class="desktop-only">PDF</span>
+                </button>
+                <button id="btn-new-card" class="btn btn-primary">
+                    <i class="ph ph-plus-circle"></i>
+                    <span>Nuova Scheda</span>
+                </button>
+            </div>
         </header>
 
         <!-- Main Content -->
