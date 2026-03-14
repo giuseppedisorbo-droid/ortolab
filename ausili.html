@@ -20,29 +20,45 @@
 <body>
     <div class="app-container">
         <!-- Header -->
-        <header class="app-header">
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <a href="index.html" class="btn-icon" title="Torna al Menu Principale" style="background-color: var(--bg-light);">
-                    <i class="ph ph-arrow-left"></i>
-                </a>
-                <div class="header-logo">
-                    <i class="ph-fill ph-wheelchair" style="color: var(--p-orange);"></i>
-                    <h1>Valutazione Ausili</h1>
+        <header class="app-header" style="flex-direction: column; align-items: stretch;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    <a href="index.html" class="btn-icon" title="Torna al Menu Principale" style="background-color: var(--bg-light);">
+                        <i class="ph ph-arrow-left"></i>
+                    </a>
+                    <div class="header-logo">
+                        <i class="ph-fill ph-wheelchair" style="color: var(--p-orange);"></i>
+                        <h1>Valutazione Ausili</h1>
+                    </div>
                 </div>
             </div>
-            <div class="header-actions" style="display: flex; gap: 1rem;">
-                <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel">
-                    <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
-                    <span class="desktop-only">Excel</span>
-                </button>
-                <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF">
-                    <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
-                    <span class="desktop-only">PDF</span>
-                </button>
-                <button id="btn-new-card" class="btn btn-primary">
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; padding-left: 4.5rem; flex-wrap: wrap;">
+                <button id="btn-new-card" class="btn btn-primary" style="box-shadow: none;">
                     <i class="ph ph-plus-circle"></i>
                     <span>Nuova Valutazione</span>
                 </button>
+                <button id="btn-stats" class="btn btn-secondary" style="border-color: var(--border-color); background-color: white;">
+                    <i class="ph ph-chart-bar" style="color: #3b82f6; font-size: 1.25rem;"></i>
+                    <span style="font-weight: 600; color: var(--text-main);">Statistiche</span>
+                </button>
+
+                <div class="dropdown" style="position: relative;">
+                    <button id="btn-export-menu" class="btn btn-secondary" style="border-color: var(--border-color); background-color: white; gap: 0.5rem;" onclick="document.getElementById('export-dropdown').classList.toggle('hidden')">
+                        <i class="ph ph-download-simple" style="color: var(--text-main); font-size: 1.25rem;"></i>
+                        <span style="font-weight: 600; color: var(--text-main);">Esporta</span>
+                        <i class="ph ph-caret-down" style="color: var(--text-muted);"></i>
+                    </button>
+                    <div id="export-dropdown" class="hidden" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin-top: 0.5rem; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 20; min-width: 150px;">
+                        <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel" style="width: 100%; border: none; justify-content: flex-start; padding: 0.5rem 1rem;">
+                            <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
+                            <span>Excel</span>
+                        </button>
+                        <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF" style="width: 100%; border: none; justify-content: flex-start; padding: 0.5rem 1rem;">
+                            <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
+                            <span>PDF</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -67,7 +83,12 @@
         <div class="modal modal-lg">
             <div class="modal-header">
                 <h2 id="modal-title">Nuova Scheda Valutazione Ausili</h2>
-                <button id="btn-close-modal" class="btn-icon"><i class="ph ph-x"></i></button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button type="button" id="btn-open-schema" class="btn btn-secondary" style="border-color: #eab308; background-color: #fef08a; color: #854d0e; padding: 0.3rem 0.75rem; font-size: 0.9rem; font-weight: 600;">
+                        <i class="ph ph-image"></i> Schema Misure
+                    </button>
+                    <button type="button" id="btn-close-modal" class="btn-icon"><i class="ph ph-x"></i></button>
+                </div>
             </div>
             <div class="modal-body">
                 <form id="ausili-form">
@@ -103,27 +124,30 @@
                         </div>
                     </div>
 
-                    <!-- Misure -->
-                    <h3 style="margin: 1.5rem 0 1rem; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Misure (cm)</h3>
+                    <!-- Misure Prioritarie -->
+                    <h3 style="margin: 1.5rem 0 1rem; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Misure Prioritarie (cm)</h3>
                     <div class="form-row">
-                        <div class="form-group flex-1"><label for="misura1">1 - Profondità seduta</label><input type="number" step="0.1" id="misura1"></div>
+                        <div class="form-group flex-1"><label for="misura1">1 - Profondità seduta</label><input type="number" step="0.1" id="misura1" class="priority-field"></div>
+                        <div class="form-group flex-1"><label for="misura4">4 - Altezza spalle</label><input type="number" step="0.1" id="misura4" class="priority-field"></div>
+                        <div class="form-group flex-1"><label for="misura7">7 - Tallone-cavo popliteo</label><input type="number" step="0.1" id="misura7" class="priority-field"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group flex-1"><label for="misura10">10 - Larghezza torace</label><input type="number" step="0.1" id="misura10" class="priority-field"></div>
+                        <div class="form-group flex-1"><label for="misura11">11 - Larghezza bacino</label><input type="number" step="0.1" id="misura11" class="priority-field"></div>
+                        <div class="form-group flex-1"></div>
+                    </div>
+
+                    <!-- Altre Misure -->
+                    <h3 style="margin: 1.5rem 0 1rem; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Altre Misure (cm)</h3>
+                    <div class="form-row">
                         <div class="form-group flex-1"><label for="misura2">2 - Profondità torace</label><input type="number" step="0.1" id="misura2"></div>
                         <div class="form-group flex-1"><label for="misura3">3 - Seduta-cavo ascellare</label><input type="number" step="0.1" id="misura3"></div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group flex-1"><label for="misura4">4 - Altezza spalle</label><input type="number" step="0.1" id="misura4"></div>
                         <div class="form-group flex-1"><label for="misura5">5 - Spalle-capo</label><input type="number" step="0.1" id="misura5"></div>
-                        <div class="form-group flex-1"><label for="misura6">6 - Seduta-bracciolo</label><input type="number" step="0.1" id="misura6"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group flex-1"><label for="misura7">7 - Tallone-cavo popliteo</label><input type="number" step="0.1" id="misura7"></div>
+                        <div class="form-group flex-1"><label for="misura6">6 - Seduta-bracciolo</label><input type="number" step="0.1" id="misura6"></div>
                         <div class="form-group flex-1"><label for="misura8">8 - Polso-gomito</label><input type="number" step="0.1" id="misura8"></div>
                         <div class="form-group flex-1"><label for="misura9">9 - Larghezza spalle</label><input type="number" step="0.1" id="misura9"></div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group flex-1"><label for="misura10">10 - Larghezza torace</label><input type="number" step="0.1" id="misura10"></div>
-                        <div class="form-group flex-1"><label for="misura11">11 - Larghezza bacino</label><input type="number" step="0.1" id="misura11"></div>
-                        <div class="form-group flex-1"></div>
                     </div>
 
                     <h3 style="margin: 1.5rem 0 1rem; color: var(--text-main); font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Personalizzazioni e Richieste</h3>
@@ -150,6 +174,97 @@
                         <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> Salva Valutazione</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Schema Misure -->
+    <div id="modal-schema" class="modal-overlay hidden" style="z-index: 60;">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Schema Misure Interattivo</h2>
+                <button type="button" id="btn-close-schema" class="btn-icon"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem; text-align: center; position: relative; background: #fafafa;">
+                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-muted); text-align: left;">Clicca sui numeri per inserire la misura. I numeri gialli sono prioritari.</p>
+                
+                <div id="schema-container" style="position: relative; display: inline-block; max-width: 100%;">
+                    <!-- L'utente dovrà salvare l'immagine come schema_misure.png -->
+                    <img src="schema_misure.png" alt="Schema Misure" style="width: 100%; max-width: 400px; display: block; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: white;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'800\'><rect width=\'100%\' height=\'100%\' fill=\'%23f3f4f6\'/><text x=\'50%\' y=\'50%\' fill=\'%236b7280\' text-anchor=\'middle\' font-family=\'sans-serif\'>Salva immagine come: schema_misure.png</text></svg>'">
+                    
+                    <!-- Side view pins -->
+                    <button type="button" class="schema-pin priority" style="top: 38%; left: 45%;" data-measure="misura1">1</button>
+                    <button type="button" class="schema-pin" style="top: 22%; left: 60%;" data-measure="misura2">2</button>
+                    <button type="button" class="schema-pin" style="top: 30%; left: 23%;" data-measure="misura3">3</button>
+                    <button type="button" class="schema-pin priority" style="top: 33%; left: 13%;" data-measure="misura4">4</button>
+                    <button type="button" class="schema-pin" style="top: 12%; left: 13%;" data-measure="misura5">5</button>
+                    <button type="button" class="schema-pin" style="top: 35%; left: 35%;" data-measure="misura6">6</button>
+                    <button type="button" class="schema-pin priority" style="top: 48%; left: 75%;" data-measure="misura7">7</button>
+                    <button type="button" class="schema-pin" style="top: 10%; left: 65%;" data-measure="misura8">8</button>
+                    
+                    <!-- Back view pins -->
+                    <button type="button" class="schema-pin" style="top: 70%; left: 25%;" data-measure="misura9">9</button>
+                    <button type="button" class="schema-pin priority" style="top: 73%; left: 50%;" data-measure="misura10">10</button>
+                    <button type="button" class="schema-pin priority" style="top: 85%; left: 25%;" data-measure="misura11">11</button>
+
+                    <!-- Popover (initially hidden) -->
+                    <div id="schema-popover" class="hidden" style="position: absolute; background: white; padding: 0.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 2px solid var(--p-green); z-index: 70; display: flex; gap: 0.5rem; transform: translate(-50%, -100%); margin-top: -12px;">
+                        <div style="position: absolute; bottom: -8px; left: 50%; width: 12px; height: 12px; background: white; border-bottom: 2px solid var(--p-green); border-right: 2px solid var(--p-green); transform: translateX(-50%) rotate(45deg);"></div>
+                        <input type="number" id="schema-popover-input" style="width: 80px; padding: 0.35rem 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; z-index: 2; position: relative; font-family: inherit;" step="0.1" placeholder="cm">
+                        <button type="button" id="btn-schema-save" class="btn btn-primary" style="padding: 0.35rem 0.5rem; z-index: 2; position: relative; display: flex; align-items: center; justify-content: center;"><i class="ph ph-check" style="font-size: 1.1rem;"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Statistiche -->
+    <div id="modal-stats" class="modal-overlay hidden">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2>Statistiche e Report</h2>
+                <button id="btn-close-stats" class="btn-icon"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: flex-end;">
+                    <div class="form-group" style="margin-bottom: 0; width: auto;">
+                        <label for="stats-year" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Seleziona Anno</label>
+                        <select id="stats-year" style="padding: 0.5rem 2rem 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 500;">
+                            <option value="all">Tutti gli anni</option>
+                        </select>
+                    </div>
+                    <button id="btn-generate-table" class="btn btn-secondary"><i class="ph ph-table"></i> Visualizza Tabella Dati</button>
+                </div>
+
+                <div class="stats-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="stat-card" style="background: var(--bg-light); padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Totale Pazienti</h4>
+                        <div id="stat-total" style="font-size: 1.75rem; font-weight: 700; color: var(--text-main);">0</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--p-green-light); padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <h4 style="color: var(--p-green-hover); font-size: 0.85rem; margin-bottom: 0.5rem;">Pazienti Anno<br>(Filtro att.)</h4>
+                        <div id="stat-year" style="font-size: 1.75rem; font-weight: 700; color: var(--p-green);">0</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--p-orange-light); padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid rgba(249, 115, 22, 0.2);">
+                        <h4 style="color: var(--p-orange-hover); font-size: 0.85rem; margin-bottom: 0.5rem;">Questo Trimestre<br>(Corr.)</h4>
+                        <div id="stat-quarter" style="font-size: 1.75rem; font-weight: 700; color: var(--p-orange);">0</div>
+                    </div>
+                    <div class="stat-card" style="background: #eff6ff; padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid #bfdbfe;">
+                        <h4 style="color: #2563eb; font-size: 0.85rem; margin-bottom: 0.5rem;">Questo Mese<br>(Corr.)</h4>
+                        <div id="stat-month" style="font-size: 1.75rem; font-weight: 700; color: #3b82f6;">0</div>
+                    </div>
+                </div>
+
+                <div id="stats-table-container" style="overflow-x: auto; max-height: 400px; display: none; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap;">
+                        <thead style="background: var(--bg-light); position: sticky; top: 0; z-index: 10;">
+                            <tr id="stats-table-head">
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

@@ -129,6 +129,20 @@ function setupEventListeners() {
         if(e.target === modal) closeModal();
     });
 
+    const btnStats = document.getElementById('btn-stats');
+    if (btnStats) btnStats.addEventListener('click', openStatsModal);
+    
+    const btnCloseStats = document.getElementById('btn-close-stats');
+    if (btnCloseStats) btnCloseStats.addEventListener('click', closeStatsModal);
+
+    document.addEventListener('click', (e) => {
+        const drop = document.getElementById('export-dropdown');
+        const btnDrop = document.getElementById('btn-export-menu');
+        if (drop && btnDrop && !drop.contains(e.target) && !btnDrop.contains(e.target)) {
+            drop.classList.add('hidden');
+        }
+    });
+
     form.addEventListener('submit', handleFormSubmit);
     searchInput.addEventListener('input', () => renderCards(searchInput.value));
 }
@@ -138,7 +152,10 @@ function openModal(id = null, readOnly = false) {
     const inputs = form.querySelectorAll('input, select, textarea');
     const btnSubmit = form.querySelector('button[type="submit"]');
     
-    inputs.forEach(input => input.disabled = readOnly);
+    inputs.forEach(input => {
+        input.disabled = readOnly;
+        input.classList.remove('readonly-filled', 'readonly-empty');
+    });
     btnSubmit.style.display = readOnly ? 'none' : 'inline-flex';
 
     if (id) {
@@ -178,6 +195,17 @@ function openModal(id = null, readOnly = false) {
             maxProg = Math.max(...schede.map(s => parseInt(s.progressivo) || 0));
         }
         inputProgressivo.value = maxProg + 1;
+    }
+    
+    // Assegna classi per evidenziare campi compilati/vuoti se in readonly
+    if (readOnly) {
+        inputs.forEach(input => {
+            if (input.value && input.value.trim() !== '') {
+                input.classList.add('readonly-filled');
+            } else {
+                input.classList.add('readonly-empty');
+            }
+        });
     }
     
     document.body.style.overflow = 'hidden'; 
@@ -252,6 +280,246 @@ window.deleteCard = function(id) {
 window.openModal = openModal;
 window.viewModal = function(id) { openModal(id, true); };
 window.editModal = function(id) { openModal(id, false); };
+
+// --- Stats Modal Logic ---
+const modalStats = document.getElementById('modal-stats');
+const statsYearSelect = document.getElementById('stats-year');
+const btnGenerateTable = document.getElementById('btn-generate-table');
+const statsTableContainer = document.getElementById('stats-table-container');
+
+function openStatsModal() {
+    const years = new Set();
+    schede.forEach(s => {
+        if(s.data) {
+            const y = s.data.substring(0,4);
+            if(y) years.add(y);
+        }
+    });
+    
+    const sortedYears = Array.from(years).sort((a,b) => b.localeCompare(a));
+    
+    if (statsYearSelect) {
+        statsYearSelect.innerHTML = '<option value="all">Tutti gli anni</option>';
+        sortedYears.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            statsYearSelect.appendChild(opt);
+        });
+    }
+    
+    refreshStats();
+    if (statsTableContainer) statsTableContainer.style.display = 'none';
+    
+    document.body.style.overflow = 'hidden';
+    if (modalStats) modalStats.classList.remove('hidden');
+}
+
+function closeStatsModal() {
+    if (modalStats) modalStats.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+function refreshStats() {
+    if (!statsYearSelect) return;
+    const selectedYear = statsYearSelect.value;
+    const now = new Date();
+    const currentYearStr = now.getFullYear().toString();
+    const currentMonthStr = (now.getMonth() + 1).toString().padStart(2, '0');
+    const currentQuarterStr = Math.floor(now.getMonth() / 3) + 1;
+
+    let tot = 0, totYear = 0, totQuarter = 0, totMonth = 0;
+
+    schede.forEach(s => {
+        tot++;
+        if (!s.data) return;
+        
+        const y = s.data.substring(0, 4);
+        const m = s.data.substring(5, 7);
+        const q = Math.floor((parseInt(m, 10) - 1) / 3) + 1;
+        
+        if (selectedYear === 'all' || y === selectedYear) {
+            totYear++;
+        }
+        
+        if (y === currentYearStr && q === currentQuarterStr) {
+            totQuarter++;
+        }
+        
+        if (y === currentYearStr && m === currentMonthStr) {
+            totMonth++;
+        }
+    });
+
+    const elTot = document.getElementById('stat-total');
+    if (elTot) elTot.textContent = tot;
+    const elYear = document.getElementById('stat-year');
+    if (elYear) elYear.textContent = totYear;
+    const elQuarter = document.getElementById('stat-quarter');
+    if (elQuarter) elQuarter.textContent = totQuarter;
+    const elMonth = document.getElementById('stat-month');
+    if (elMonth) elMonth.textContent = totMonth;
+}
+
+if (statsYearSelect) {
+    statsYearSelect.addEventListener('change', refreshStats);
+}
+
+if (btnGenerateTable) {
+    btnGenerateTable.addEventListener('click', () => {
+        renderStatsTable();
+    });
+}
+
+function renderStatsTable() {
+    const dataToExport = schede.map(s => ({
+        "Prog.": s.progressivo || '',
+        "Data": s.data || '',
+        "Paziente": s.paziente || '',
+        "Tecnico": s.tecnico || '',
+        "Altezza (cm)": s.altezza || '',
+        "Peso (kg)": s.peso || '',
+        "1-Prof. seduta": s.misura1 || '',
+        "2-Prof. torace": s.misura2 || '',
+        "3-Seduta-cavo": s.misura3 || '',
+        "4-Alt. spalle": s.misura4 || '',
+        "5-Spalle-capo": s.misura5 || '',
+        "6-Seduta-brac.": s.misura6 || '',
+        "Personalizzazioni": s.personalizzazioni ? 'Sì' : 'No',
+        "Richieste": s.richieste ? 'Sì' : 'No',
+        "Note": s.note || ''
+    }));
+    
+    const tHead = document.getElementById('stats-table-head');
+    const tBody = document.getElementById('stats-table-body');
+    if (!tHead || !tBody) return;
+    
+    tHead.innerHTML = '';
+    tBody.innerHTML = '';
+    
+    if (dataToExport.length === 0) return;
+    
+    const keys = Object.keys(dataToExport[0]);
+    keys.forEach(k => {
+        const th = document.createElement('th');
+        th.textContent = k;
+        th.style.padding = "0.75rem 1rem";
+        th.style.borderBottom = "1px solid var(--border-color)";
+        tHead.appendChild(th);
+    });
+    
+    dataToExport.forEach(row => {
+        const tr = document.createElement('tr');
+        keys.forEach(k => {
+            const td = document.createElement('td');
+            td.textContent = row[k] || '-';
+            td.style.padding = "0.75rem 1rem";
+            td.style.borderBottom = "1px solid var(--border-color)";
+            tr.appendChild(td);
+        });
+        tBody.appendChild(tr);
+    });
+    
+    if (statsTableContainer) statsTableContainer.style.display = 'block';
+}
+
+// --- Schema Interactive Logic ---
+const modalSchema = document.getElementById('modal-schema');
+const btnOpenSchema = document.getElementById('btn-open-schema');
+const btnCloseSchema = document.getElementById('btn-close-schema');
+const popover = document.getElementById('schema-popover');
+const popoverInput = document.getElementById('schema-popover-input');
+const btnSchemaSave = document.getElementById('btn-schema-save');
+let currentPinMeasure = null;
+let currentPinElement = null;
+
+if(btnOpenSchema) {
+    btnOpenSchema.addEventListener('click', () => {
+        if(modalSchema) modalSchema.classList.remove('hidden');
+        if(popover) popover.classList.add('hidden');
+        updatePinsStatus();
+    });
+}
+
+if(btnCloseSchema) {
+    btnCloseSchema.addEventListener('click', () => {
+        if(modalSchema) modalSchema.classList.add('hidden');
+    });
+}
+
+// Chiudi cliccando fuori dall'immagine o header
+if(modalSchema) {
+    modalSchema.addEventListener('click', (e) => {
+        if(e.target === modalSchema) {
+            modalSchema.classList.add('hidden');
+        }
+    });
+}
+
+function updatePinsStatus() {
+    document.querySelectorAll('.schema-pin').forEach(pin => {
+        const measureId = pin.getAttribute('data-measure');
+        const inputEl = document.getElementById(measureId);
+        if(inputEl && inputEl.value && inputEl.value.trim() !== '') {
+            pin.classList.add('filled');
+        } else {
+            pin.classList.remove('filled');
+        }
+    });
+}
+
+document.querySelectorAll('.schema-pin').forEach(pin => {
+    pin.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent closing if click bubbles
+        const measureId = pin.getAttribute('data-measure');
+        currentPinMeasure = measureId;
+        currentPinElement = pin;
+        
+        const mainInput = document.getElementById(measureId);
+        if(popoverInput) popoverInput.value = mainInput ? mainInput.value : '';
+
+        if(popover) {
+            popover.style.left = pin.style.left;
+            popover.style.top = pin.style.top;
+            popover.classList.remove('hidden');
+            setTimeout(() => { if(popoverInput) popoverInput.focus(); }, 50);
+        }
+    });
+});
+
+function savePopover() {
+    if(currentPinMeasure && currentPinElement) {
+        const mainInput = document.getElementById(currentPinMeasure);
+        if(mainInput && popoverInput) {
+            mainInput.value = popoverInput.value;
+        }
+        if(popover) popover.classList.add('hidden');
+        updatePinsStatus();
+    }
+}
+
+if(btnSchemaSave) {
+    btnSchemaSave.addEventListener('click', savePopover);
+}
+
+if(popoverInput) {
+    popoverInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+            e.preventDefault();
+            savePopover();
+        }
+    });
+}
+
+// Chiudi popover se si clicca altrove nell'immagine
+const schemaContainer = document.getElementById('schema-container');
+if(schemaContainer) {
+    schemaContainer.addEventListener('click', (e) => {
+        if(popover && !popover.classList.contains('hidden') && !e.target.closest('.schema-pin') && !e.target.closest('#schema-popover')) {
+            popover.classList.add('hidden');
+        }
+    });
+}
 
 // --- Export Functions ---
 function exportToExcel() {

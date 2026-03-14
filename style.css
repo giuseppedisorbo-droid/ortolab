@@ -416,9 +416,31 @@ body {
     font-weight: 600;
     -webkit-text-fill-color: #111827; /* Forza colore su Safari/Chrome */
     opacity: 1; /* Impedisce che i browser lo sbianchino */
-    padding: 0.5rem 0; /* Rimuove padding per allineare il testo */
+    padding: 0.5rem 0.75rem; /* Aggiunti margini e padding per evidenziare */
     box-shadow: none;
     cursor: default;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.form-group input:disabled.readonly-filled, 
+.form-group select:disabled.readonly-filled, 
+.form-group textarea:disabled.readonly-filled {
+    background-color: var(--p-green-light);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--p-green-hover);
+    -webkit-text-fill-color: var(--p-green-hover);
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-group input:disabled.readonly-empty, 
+.form-group select:disabled.readonly-empty, 
+.form-group textarea:disabled.readonly-empty {
+    background-color: var(--bg-light);
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    -webkit-text-fill-color: var(--text-muted);
+    opacity: 0.7;
 }
 
 /* Fix per nascondere l'icona a tendina disabilitata sui select */

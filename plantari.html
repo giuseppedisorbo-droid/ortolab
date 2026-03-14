@@ -20,29 +20,45 @@
 <body>
     <div class="app-container">
         <!-- Header -->
-        <header class="app-header">
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <a href="index.html" class="btn-icon" title="Torna al Menu Principale" style="background-color: var(--bg-light);">
-                    <i class="ph ph-arrow-left"></i>
-                </a>
-                <div class="header-logo">
-                    <i class="ph-fill ph-footprints" style="color: var(--p-orange);"></i>
-                    <h1>Gestione Plantari</h1>
+        <header class="app-header" style="flex-direction: column; align-items: stretch;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    <a href="index.html" class="btn-icon" title="Torna al Menu Principale" style="background-color: var(--bg-light);">
+                        <i class="ph ph-arrow-left"></i>
+                    </a>
+                    <div class="header-logo">
+                        <i class="ph-fill ph-footprints" style="color: var(--p-orange);"></i>
+                        <h1>Gestione Plantari</h1>
+                    </div>
                 </div>
             </div>
-            <div class="header-actions" style="display: flex; gap: 1rem;">
-                <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel">
-                    <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
-                    <span class="desktop-only">Excel</span>
-                </button>
-                <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF">
-                    <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
-                    <span class="desktop-only">PDF</span>
-                </button>
-                <button id="btn-new-card" class="btn btn-primary">
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; padding-left: 4.5rem; flex-wrap: wrap;">
+                <button id="btn-new-card" class="btn btn-primary" style="box-shadow: none;">
                     <i class="ph ph-plus-circle"></i>
                     <span>Nuova Scheda</span>
                 </button>
+                <button id="btn-stats" class="btn btn-secondary" style="border-color: var(--border-color); background-color: white;">
+                    <i class="ph ph-chart-bar" style="color: #3b82f6; font-size: 1.25rem;"></i>
+                    <span style="font-weight: 600; color: var(--text-main);">Statistiche</span>
+                </button>
+                
+                <div class="dropdown" style="position: relative;">
+                    <button id="btn-export-menu" class="btn btn-secondary" style="border-color: var(--border-color); background-color: white; gap: 0.5rem;" onclick="document.getElementById('export-dropdown').classList.toggle('hidden')">
+                        <i class="ph ph-download-simple" style="color: var(--text-main); font-size: 1.25rem;"></i>
+                        <span style="font-weight: 600; color: var(--text-main);">Esporta</span>
+                        <i class="ph ph-caret-down" style="color: var(--text-muted);"></i>
+                    </button>
+                    <div id="export-dropdown" class="hidden" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin-top: 0.5rem; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; z-index: 20; min-width: 150px;">
+                        <button id="btn-export-excel" class="btn btn-secondary" title="Esporta in Excel" style="width: 100%; border: none; justify-content: flex-start; padding: 0.5rem 1rem;">
+                            <i class="ph ph-file-xls" style="color: #16a34a; font-size: 1.25rem;"></i>
+                            <span>Excel</span>
+                        </button>
+                        <button id="btn-export-pdf" class="btn btn-secondary" title="Esporta in PDF" style="width: 100%; border: none; justify-content: flex-start; padding: 0.5rem 1rem;">
+                            <i class="ph ph-file-pdf" style="color: #ef4444; font-size: 1.25rem;"></i>
+                            <span>PDF</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -280,6 +296,57 @@
                         <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> Salva Scheda</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Statistiche -->
+    <div id="modal-stats" class="modal-overlay hidden">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2>Statistiche e Report</h2>
+                <button id="btn-close-stats" class="btn-icon"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: flex-end;">
+                    <div class="form-group" style="margin-bottom: 0; width: auto;">
+                        <label for="stats-year" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Seleziona Anno</label>
+                        <select id="stats-year" style="padding: 0.5rem 2rem 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 500;">
+                            <option value="all">Tutti gli anni</option>
+                        </select>
+                    </div>
+                    <button id="btn-generate-table" class="btn btn-secondary"><i class="ph ph-table"></i> Visualizza Tabella Dati</button>
+                </div>
+
+                <div class="stats-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="stat-card" style="background: var(--bg-light); padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border-color);">
+                        <h4 style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Totale Pazienti</h4>
+                        <div id="stat-total" style="font-size: 1.75rem; font-weight: 700; color: var(--text-main);">0</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--p-green-light); padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <h4 style="color: var(--p-green-hover); font-size: 0.85rem; margin-bottom: 0.5rem;">Pazienti Anno<br>(Filtro att.)</h4>
+                        <div id="stat-year" style="font-size: 1.75rem; font-weight: 700; color: var(--p-green);">0</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--p-orange-light); padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid rgba(249, 115, 22, 0.2);">
+                        <h4 style="color: var(--p-orange-hover); font-size: 0.85rem; margin-bottom: 0.5rem;">Questo Trimestre<br>(Corr.)</h4>
+                        <div id="stat-quarter" style="font-size: 1.75rem; font-weight: 700; color: var(--p-orange);">0</div>
+                    </div>
+                    <div class="stat-card" style="background: #eff6ff; padding: 1.5rem 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid #bfdbfe;">
+                        <h4 style="color: #2563eb; font-size: 0.85rem; margin-bottom: 0.5rem;">Questo Mese<br>(Corr.)</h4>
+                        <div id="stat-month" style="font-size: 1.75rem; font-weight: 700; color: #3b82f6;">0</div>
+                    </div>
+                </div>
+
+                <div id="stats-table-container" style="overflow-x: auto; max-height: 400px; display: none; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap;">
+                        <thead style="background: var(--bg-light); position: sticky; top: 0; z-index: 10;">
+                            <tr id="stats-table-head">
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
