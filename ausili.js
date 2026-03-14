@@ -804,8 +804,13 @@ async function getAnnotatedSchemaBase64(scheda) {
                     let rectX = pin.id === 'misura7' ? px : px - w/2;
                     let rectY = py - h/2;
                     
-                    // Box rosso
-                    ctx.fillStyle = 'red';
+                    // Box background: giallo per le prioritarie, rosso per le altre
+                    const priorityMeasures = ['misura1', 'misura4', 'misura7', 'misura10', 'misura11'];
+                    if (priorityMeasures.includes(pin.id)) {
+                        ctx.fillStyle = 'yellow';
+                    } else {
+                        ctx.fillStyle = 'red';
+                    }
                     ctx.fillRect(rectX, rectY, w, h);
                     
                     // Bordo bianco
@@ -841,9 +846,15 @@ window.generateSinglePdf = async function(id, forceDownload = false) {
     ]);
     
     // Helper per le righe delle misure così son tutte uguali
+    const priorityMeasures = ['misura1', 'misura4', 'misura7', 'misura10', 'misura11'];
     const makeMeasureRow = (label, valueId, unit) => {
+        const isPriority = priorityMeasures.includes(valueId);
+        const labelObj = isPriority 
+            ? {text: label, fontSize: 9, margin: [0, 5, 0, 5], decoration: 'underline', decorationColor: '#eab308'}
+            : {text: label, fontSize: 9, margin: [0, 5, 0, 5]};
+            
         return [
-            {text: label, fontSize: 9, margin: [0, 5, 0, 5]}, 
+            labelObj, 
             {text: scheda[valueId] || '         ', alignment: 'center', decoration: 'underline', fontSize: 11, margin: [0, 4, 0, 4]}, 
             {text: unit, fontSize: 9, margin: [0, 5, 0, 5]}
         ];
