@@ -24,8 +24,8 @@ const modal = document.getElementById('modal-card');
 const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCancel = document.getElementById('btn-cancel');
 const form = document.getElementById('ausili-form');
-const modalTitle = document.getElementById('modal-title');
 const btnSinglePdf = document.getElementById('btn-single-pdf');
+const btnSingleDownload = document.getElementById('btn-single-download');
 
 // Form inputs
 const inputId = document.getElementById('card-id');
@@ -195,11 +195,16 @@ function openModal(id = null, readOnly = false) {
             
             if (btnSinglePdf) {
                 btnSinglePdf.style.display = 'inline-flex';
-                btnSinglePdf.onclick = () => window.generateSinglePdf(scheda.id);
+                btnSinglePdf.onclick = () => window.generateSinglePdf(scheda.id, false);
+            }
+            if (btnSingleDownload) {
+                btnSingleDownload.style.display = 'inline-flex';
+                btnSingleDownload.onclick = () => window.generateSinglePdf(scheda.id, true);
             }
         }
     } else {
         if (btnSinglePdf) btnSinglePdf.style.display = 'none';
+        if (btnSingleDownload) btnSingleDownload.style.display = 'none';
         modalTitle.textContent = "Nuova Scheda Plantare";
         form.reset();
         inputId.value = '';
@@ -824,7 +829,7 @@ async function getAnnotatedSchemaBase64(scheda) {
     });
 }
 
-window.generateSinglePdf = async function(id) {
+window.generateSinglePdf = async function(id, forceDownload = false) {
     const scheda = schede.find(s => s.id === id);
     if (!scheda) return;
 
@@ -961,6 +966,11 @@ window.generateSinglePdf = async function(id) {
 
     const fileName = `Scheda_Ausili_${(scheda.paziente||'').replace(/\s+/g, '_')}_${scheda.progressivo}.pdf`;
     const pdfGenerator = pdfMake.createPdf(docDefinition);
+
+    if (forceDownload) {
+        pdfGenerator.download(fileName);
+        return;
+    }
 
     // Verifica se siamo su un dispositivo mobile usando il touch screen o user agent
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
