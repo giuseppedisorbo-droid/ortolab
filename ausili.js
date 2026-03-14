@@ -962,41 +962,53 @@ window.generateSinglePdf = async function(id) {
     const fileName = `Scheda_Ausili_${(scheda.paziente||'').replace(/\s+/g, '_')}_${scheda.progressivo}.pdf`;
     const pdfGenerator = pdfMake.createPdf(docDefinition);
 
-    pdfGenerator.getBlob(async (blob) => {
-        const file = new File([blob], fileName, { type: 'application/pdf' });
-        
-        // Verifica se siamo su un dispositivo mobile usando il touch screen o user agent
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-        
-        // 1. Prova prima con la Web Share API nativa (SOLO su Mobile = WhatsApp, Mail, Salva File)
-        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: `Scheda ${scheda.paziente || ''}`,
-                    text: 'In allegato la scheda di valutazione ausili.'
-                });
-                console.log('Condivisione nativa completata con successo');
-                return; // Fermati qua se l'utente ha utilizzato con successo il menu nativo
-            } catch (err) {
-                console.log('Condivisione annullata dal menu nativo o fallita:', err);
-                // Non blocchiamo, andiamo al fallback
+    // Verifica se siamo su un dispositivo mobile usando il touch screen o user agent
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+
+    if (isMobile) {
+        pdfGenerator.getBlob(async (blob) => {
+            const file = new File([blob], fileName, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: `Scheda ${scheda.paziente || ''}`,
+                        text: 'In allegato la scheda di valutazione ausili.'
+                    });
+                    console.log('Condivisione nativa completata con successo');
+                    return; 
+                } catch (err) {
+                    console.log('Condivisione annullata dal menu nativo o fallita:', err);
+                }
             }
-        }
-        
-        // 2. Fallback universale o scelta PC
-        if (isMobile) {
-            // Se eravamo su mobile e il web share è fallito
+            
             const url = window.URL.createObjectURL(blob);
             window.open(url, '_blank');
             setTimeout(() => window.URL.revokeObjectURL(url), 5000);
-        } else {
-            // Su PC forziamo SOLO il download tramite la funzione nativa sicura di pdfMake.
-            // Eliminiamo il menu "Share" Windows 11 nativo, altrimenti Safari/Edge per PC
-            // entrano in conflitto bloccando il download effettivo del file PDF sulla macchina.
-            pdfGenerator.download(fileName);
+        });
+    } else {
+        // Su PC: 1) Download immediato e sincrono bypassing pop-up blockers
+        pdfGenerator.download(fileName);
+        
+        // Su PC: 2) Se supportato, apriamo anche il menu di condivisione di Windows in background 
+        // per soddisfare la richiesta (es. per invio veloce via Whatsapp Web in app nativa)
+        if (navigator.canShare) {
+            pdfGenerator.getBlob(async (blob) => {
+                const file = new File([blob], fileName, { type: 'application/pdf' });
+                if (navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: `Scheda ${scheda.paziente || ''}`,
+                            text: 'In allegato la scheda di valutazione ausili.'
+                        });
+                    } catch (err) {
+                        console.log('Share PC annullato dall\'utente:', err);
+                    }
+                }
+            });
         }
-    });
+    }
 }
 
 // --- Rendering ---
