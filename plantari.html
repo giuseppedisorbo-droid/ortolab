@@ -106,119 +106,168 @@
                     <div class="form-row">
                         <div class="form-group flex-1">
                             <label for="rivestimento">Rivestimento</label>
-                            <select id="rivestimento">
-                                <option value=""></option>
-                                <option value="SI">SI</option>
-                                <option value="NO">NO</option>
-                            </select>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select id="rivestimento" style="flex: 2;">
+                                    <option value=""></option>
+                                    <option value="SI">SI</option>
+                                    <option value="NO">NO</option>
+                                </select>
+                                <select id="rivestimento-lato" style="flex: 1; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                    <option value="Cp." title="Coppia">Cp.</option>
+                                    <option value="Dx" title="Destro">Dx</option>
+                                    <option value="Sx" title="Sinistro">Sx</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group flex-1">
                             <label for="pellami">Pellami</label>
-                            <select id="pellami">
-                                <option value=""></option>
-                                <option value="SI">SI</option>
-                                <option value="NO">NO</option>
-                            </select>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select id="pellami" style="flex: 2;">
+                                    <option value=""></option>
+                                    <option value="SI">SI</option>
+                                    <option value="NO">NO</option>
+                                </select>
+                                <select id="pellami-lato" style="flex: 1; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                    <option value="Cp.">Cp.</option>
+                                    <option value="Dx">Dx</option>
+                                    <option value="Sx">Sx</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group flex-1">
                             <label for="interi-mezzo">Plantari Interi/Mezzo</label>
-                            <select id="interi-mezzo">
-                                <option value=""></option>
-                                <optgroup label="Interi In Lattice">
-                                    <option value="35L">35L</option>
-                                </optgroup>
-                                <optgroup label="Mezzo Plantare In Lattice">
-                                    <option value="32/1L">32/1L</option>
-                                    <option value="32/2L">32/2L</option>
-                                    <option value="32/3L">32/3L</option>
-                                    <option value="10L">10L</option>
-                                </optgroup>
-                            </select>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select id="interi-mezzo" style="flex: 2;">
+                                    <option value=""></option>
+                                    <optgroup label="Interi In Lattice">
+                                        <option value="35L">35L</option>
+                                    </optgroup>
+                                    <optgroup label="Mezzo Plantare In Lattice">
+                                        <option value="32/1L">32/1L</option>
+                                        <option value="32/2L">32/2L</option>
+                                        <option value="32/3L">32/3L</option>
+                                        <option value="10L">10L</option>
+                                    </optgroup>
+                                </select>
+                                <select id="interi-mezzo-lato" style="flex: 1; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                    <option value="Cp.">Cp.</option>
+                                    <option value="Dx">Dx</option>
+                                    <option value="Sx">Sx</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group flex-1">
                             <label for="scarico">Scarico Calca.</label>
-                            <select id="scarico">
-                                <option value=""></option>
-                                <option value="31/1L">31/1L</option>
-                                <option value="31/2L">31/2L</option>
-                                <option value="31/3L">31/3L</option>
-                                <option value="34/1L">34/1L</option>
-                                <option value="34/2L">34/2L</option>
-                                <option value="37L">37L</option>
-                                <option value="38L">38L</option>
-                                <option value="39L">39L</option>
-                            </select>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select id="scarico" style="flex: 2;">
+                                    <option value=""></option>
+                                    <option value="31/1L">31/1L</option>
+                                    <option value="31/2L">31/2L</option>
+                                    <option value="31/3L">31/3L</option>
+                                    <option value="34/1L">34/1L</option>
+                                    <option value="34/2L">34/2L</option>
+                                    <option value="37L">37L</option>
+                                    <option value="38L">38L</option>
+                                    <option value="39L">39L</option>
+                                </select>
+                                <select id="scarico-lato" style="flex: 1; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                    <option value="Cp.">Cp.</option>
+                                    <option value="Dx">Dx</option>
+                                    <option value="Sx">Sx</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group flex-1">
                             <label for="sostegno-met">Sostegno Met.</label>
-                            <select id="sostegno-met">
-                                <option value=""></option>
-                                <optgroup label="Oliva">
-                                    <option value="1L">1L</option>
-                                    <option value="2L">2L</option>
-                                    <option value="3L">3L</option>
-                                    <option value="267/1L">267/1L</option>
-                                    <option value="267/2L">267/2L</option>
-                                    <option value="267/3L">267/3L</option>
-                                    <option value="18L">18L</option>
-                                    <option value="19L">19L</option>
-                                    <option value="20L">20L</option>
-                                    <option value="21L">21L</option>
-                                    <option value="49L">49L</option>
-                                    <option value="50L">50L</option>
-                                    <option value="51L">51L</option>
-                                    <option value="52L">52L</option>
-                                </optgroup>
-                                <optgroup label="Barra">
-                                    <option value="8L">8L</option>
-                                    <option value="9L">9L</option>
-                                    <option value="903/1L">903/1L</option>
-                                    <option value="903/2L">903/2L</option>
-                                    <option value="903/4L">903/4L</option>
-                                    <option value="22L">22L</option>
-                                    <option value="23L">23L</option>
-                                    <option value="24L">24L</option>
-                                    <option value="25L">25L</option>
-                                    <option value="6L">6L</option>
-                                    <option value="7L">7L</option>
-                                    <option value="305LR">305LR</option>
-                                </optgroup>
-                            </select>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select id="sostegno-met" style="flex: 2;">
+                                    <option value=""></option>
+                                    <optgroup label="Oliva">
+                                        <option value="1L">1L</option>
+                                        <option value="2L">2L</option>
+                                        <option value="3L">3L</option>
+                                        <option value="267/1L">267/1L</option>
+                                        <option value="267/2L">267/2L</option>
+                                        <option value="267/3L">267/3L</option>
+                                        <option value="18L">18L</option>
+                                        <option value="19L">19L</option>
+                                        <option value="20L">20L</option>
+                                        <option value="21L">21L</option>
+                                        <option value="49L">49L</option>
+                                        <option value="50L">50L</option>
+                                        <option value="51L">51L</option>
+                                        <option value="52L">52L</option>
+                                    </optgroup>
+                                    <optgroup label="Barra">
+                                        <option value="8L">8L</option>
+                                        <option value="9L">9L</option>
+                                        <option value="903/1L">903/1L</option>
+                                        <option value="903/2L">903/2L</option>
+                                        <option value="903/4L">903/4L</option>
+                                        <option value="22L">22L</option>
+                                        <option value="23L">23L</option>
+                                        <option value="24L">24L</option>
+                                        <option value="25L">25L</option>
+                                        <option value="6L">6L</option>
+                                        <option value="7L">7L</option>
+                                        <option value="305LR">305LR</option>
+                                    </optgroup>
+                                </select>
+                                <select id="sostegno-met-lato" style="flex: 1; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                    <option value="Cp.">Cp.</option>
+                                    <option value="Dx">Dx</option>
+                                    <option value="Sx">Sx</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group flex-1">
                             <label for="sostegno-volte">Sostegno Met Volte Long.</label>
-                            <select id="sostegno-volte">
-                                <option value=""></option>
-                                <option value="12L">12L</option>
-                                <option value="13L">13L</option>
-                                <option value="14L">14L</option>
-                                <option value="15L">15L</option>
-                                <option value="16L">16L</option>
-                                <option value="17L">17L</option>
-                                <option value="53L">53L</option>
-                                <option value="54L">54L</option>
-                                <option value="55L">55L</option>
-                                <option value="56L">56L</option>
-                                <option value="44L">44L</option>
-                                <option value="45L">45L</option>
-                                <option value="46L">46L</option>
-                                <option value="47L">47L</option>
-                                <option value="48L">48L</option>
-                            </select>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <select id="sostegno-volte" style="flex: 2;">
+                                    <option value=""></option>
+                                    <option value="12L">12L</option>
+                                    <option value="13L">13L</option>
+                                    <option value="14L">14L</option>
+                                    <option value="15L">15L</option>
+                                    <option value="16L">16L</option>
+                                    <option value="17L">17L</option>
+                                    <option value="53L">53L</option>
+                                    <option value="54L">54L</option>
+                                    <option value="55L">55L</option>
+                                    <option value="56L">56L</option>
+                                    <option value="44L">44L</option>
+                                    <option value="45L">45L</option>
+                                    <option value="46L">46L</option>
+                                    <option value="47L">47L</option>
+                                    <option value="48L">48L</option>
+                                </select>
+                                <select id="sostegno-volte-lato" style="flex: 1; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                    <option value="Cp.">Cp.</option>
+                                    <option value="Dx">Dx</option>
+                                    <option value="Sx">Sx</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="piano-inc">Piano Inclinato</label>
-                        <select id="piano-inc">
-                            <option value=""></option>
-                            <option value="60L">60L</option>
-                            <option value="80/1L">80/1L</option>
-                            <option value="80/2L">80/2L</option>
-                        </select>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <select id="piano-inc" style="flex: 2;">
+                                <option value=""></option>
+                                <option value="60L">60L</option>
+                                <option value="80/1L">80/1L</option>
+                                <option value="80/2L">80/2L</option>
+                            </select>
+                            <select id="piano-inc-lato" style="flex: 1; max-width: 150px; padding-left: 0.5rem; padding-right: 0.5rem;">
+                                <option value="Cp.">Cp.</option>
+                                <option value="Dx">Dx</option>
+                                <option value="Sx">Sx</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-group">

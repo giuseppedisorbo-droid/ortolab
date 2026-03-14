@@ -35,12 +35,19 @@ const inputMisura = document.getElementById('misura');
 const inputSchiuma = document.getElementById('schiuma');
 const inputCodice = document.getElementById('codice');
 const inputRivestimento = document.getElementById('rivestimento');
+const inputRivestimentoLato = document.getElementById('rivestimento-lato');
 const inputPellami = document.getElementById('pellami');
+const inputPellamiLato = document.getElementById('pellami-lato');
 const inputInteriMezzo = document.getElementById('interi-mezzo');
+const inputInteriMezzoLato = document.getElementById('interi-mezzo-lato');
 const inputScarico = document.getElementById('scarico');
+const inputScaricoLato = document.getElementById('scarico-lato');
 const inputSostegnoMet = document.getElementById('sostegno-met');
+const inputSostegnoMetLato = document.getElementById('sostegno-met-lato');
 const inputSostegnoVolte = document.getElementById('sostegno-volte');
+const inputSostegnoVolteLato = document.getElementById('sostegno-volte-lato');
 const inputPianoInc = document.getElementById('piano-inc');
+const inputPianoIncLato = document.getElementById('piano-inc-lato');
 const inputNote = document.getElementById('note');
 
 // --- Initialization ---
@@ -148,12 +155,19 @@ function openModal(id = null, readOnly = false) {
             inputCodice.value = scheda.codice || '';
             
             inputRivestimento.value = scheda.rivestimento || '';
+            inputRivestimentoLato.value = scheda.rivestimentoLato || 'Cp.';
             inputPellami.value = scheda.pellami || '';
+            inputPellamiLato.value = scheda.pellamiLato || 'Cp.';
             inputInteriMezzo.value = scheda.interiMezzo || '';
+            inputInteriMezzoLato.value = scheda.interiMezzoLato || 'Cp.';
             inputScarico.value = scheda.scarico || '';
+            inputScaricoLato.value = scheda.scaricoLato || 'Cp.';
             inputSostegnoMet.value = scheda.sostegnoMet || '';
+            inputSostegnoMetLato.value = scheda.sostegnoMetLato || 'Cp.';
             inputSostegnoVolte.value = scheda.sostegnoVolte || '';
+            inputSostegnoVolteLato.value = scheda.sostegnoVolteLato || 'Cp.';
             inputPianoInc.value = scheda.pianoInc || '';
+            inputPianoIncLato.value = scheda.pianoIncLato || 'Cp.';
             inputNote.value = scheda.note || '';
         }
     } else {
@@ -197,12 +211,19 @@ function handleFormSubmit(e) {
         schiuma: inputSchiuma.value,
         codice: inputCodice.value,
         rivestimento: inputRivestimento.value,
+        rivestimentoLato: inputRivestimentoLato.value,
         pellami: inputPellami.value,
+        pellamiLato: inputPellamiLato.value,
         interiMezzo: inputInteriMezzo.value,
+        interiMezzoLato: inputInteriMezzoLato.value,
         scarico: inputScarico.value,
+        scaricoLato: inputScaricoLato.value,
         sostegnoMet: inputSostegnoMet.value,
+        sostegnoMetLato: inputSostegnoMetLato.value,
         sostegnoVolte: inputSostegnoVolte.value,
+        sostegnoVolteLato: inputSostegnoVolteLato.value,
         pianoInc: inputPianoInc.value,
+        pianoIncLato: inputPianoIncLato.value,
         note: inputNote.value
     };
 
@@ -243,6 +264,8 @@ function exportToExcel() {
         return;
     }
     
+    const formatExport = (val, lato) => val ? `${val}${lato && lato !== 'Cp.' ? ` (${lato})` : ''}` : '';
+
     // Mappa per tradurre chiavi in intestazioni belle
     const dataToExport = schede.map(s => ({
         "N. Progressivo": s.progressivo,
@@ -251,13 +274,13 @@ function exportToExcel() {
         "Numero Calzata": s.misura,
         "Schiuma": s.schiuma,
         "Codice Plantare": s.codice,
-        "Rivestimento": s.rivestimento,
-        "Pellami": s.pellami,
-        "Plantari Interi/Mezzo": s.interiMezzo,
-        "Scarico Calca.": s.scarico,
-        "Sostegno Met.": s.sostegnoMet,
-        "Sostegno Volte": s.sostegnoVolte,
-        "Piano Inclinato": s.pianoInc,
+        "Rivestimento": formatExport(s.rivestimento, s.rivestimentoLato),
+        "Pellami": formatExport(s.pellami, s.pellamiLato),
+        "Plantari Interi/Mezzo": formatExport(s.interiMezzo, s.interiMezzoLato),
+        "Scarico Calca.": formatExport(s.scarico, s.scaricoLato),
+        "Sostegno Met.": formatExport(s.sostegnoMet, s.sostegnoMetLato),
+        "Sostegno Volte": formatExport(s.sostegnoVolte, s.sostegnoVolteLato),
+        "Piano Inclinato": formatExport(s.pianoInc, s.pianoIncLato),
         "Note": s.note
     }));
 
@@ -305,6 +328,8 @@ function exportToPdf() {
         ]
     ];
     
+    const formatExport = (val, lato) => val ? `${val}${lato && lato !== 'Cp.' ? ` (${lato})` : ''}` : '';
+
     schede.forEach(s => {
         tableBody.push([
             s.progressivo?.toString() || '',
@@ -312,11 +337,11 @@ function exportToPdf() {
             s.paziente || '',
             s.misura || '',
             s.codice || '',
-            (s.rivestimento || '') + '/' + (s.pellami || ''),
-            s.interiMezzo || '',
-            s.scarico || '',
-            s.sostegnoMet || '',
-            s.sostegnoVolte || ''
+            `${formatExport(s.rivestimento, s.rivestimentoLato)} / ${formatExport(s.pellami, s.pellamiLato)}`,
+            formatExport(s.interiMezzo, s.interiMezzoLato),
+            formatExport(s.scarico, s.scaricoLato),
+            formatExport(s.sostegnoMet, s.sostegnoMetLato),
+            formatExport(s.sostegnoVolte, s.sostegnoVolteLato)
         ]);
     });
 
@@ -404,12 +429,29 @@ function renderCards(filterText = '') {
         
         let details = [];
         if(scheda.schiuma) details.push(`Schiuma: ${scheda.schiuma}`);
-        if(scheda.rivestimento) details.push(`Rivestimento: ${scheda.rivestimento}`);
-        if(scheda.pellami) details.push(`Pellami: ${scheda.pellami}`);
-        if(scheda.scarico) details.push(`Scarico: ${scheda.scarico}`);
-        if(scheda.sostegnoMet) details.push(`Sost.Met.: ${scheda.sostegnoMet}`);
-        if(scheda.sostegnoVolte) details.push(`Sost.Volte: ${scheda.sostegnoVolte}`);
-        if(scheda.interiMezzo) details.push(`Int/Mezzo: ${scheda.interiMezzo}`);
+        
+        const formatComp = (val, lato) => val ? `${val}${lato && lato !== 'Cp.' ? ` (${lato})` : ''}` : null;
+        
+        const riv = formatComp(scheda.rivestimento, scheda.rivestimentoLato);
+        if(riv) details.push(`Rivestimento: ${riv}`);
+        
+        const pell = formatComp(scheda.pellami, scheda.pellamiLato);
+        if(pell) details.push(`Pellami: ${pell}`);
+        
+        const intMez = formatComp(scheda.interiMezzo, scheda.interiMezzoLato);
+        if(intMez) details.push(`Int/Mezzo: ${intMez}`);
+        
+        const scar = formatComp(scheda.scarico, scheda.scaricoLato);
+        if(scar) details.push(`Scarico: ${scar}`);
+        
+        const sostM = formatComp(scheda.sostegnoMet, scheda.sostegnoMetLato);
+        if(sostM) details.push(`Sost.Met.: ${sostM}`);
+        
+        const sostV = formatComp(scheda.sostegnoVolte, scheda.sostegnoVolteLato);
+        if(sostV) details.push(`Sost.Volte: ${sostV}`);
+        
+        const piano = formatComp(scheda.pianoInc, scheda.pianoIncLato);
+        if(piano) details.push(`Piano Inc.: ${piano}`);
 
         const detailsStr = details.length > 0 ? details.join(' | ') : 'Nessun parametro aggiuntivo';
         
