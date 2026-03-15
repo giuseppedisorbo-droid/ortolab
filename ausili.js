@@ -874,7 +874,8 @@ window.generateSinglePdf = async function(id, forceDownload = false) {
                         width: 170,
                         text: [
                             { text: 'Data: ', bold: true, fontSize: 10 }, {text: (formatDate(scheda.data) !== '-' ? formatDate(scheda.data) : '') + '\n', fontSize: 10, decoration: 'underline'},
-                            { text: '\nTecnico: ', bold: true, fontSize: 10 }, {text: scheda.tecnico || '', fontSize: 10, decoration: 'underline'}
+                            { text: '\nTecnico: ', bold: true, fontSize: 10 }, {text: scheda.tecnico || '', fontSize: 10, decoration: 'underline'},
+                            { text: '\n\nPaziente: ', bold: true, fontSize: 11 }, {text: scheda.paziente || '', fontSize: 12, bold: true, decoration: 'underline'}
                         ],
                         margin: [0, 10, 0, 0]
                     },
