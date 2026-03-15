@@ -799,7 +799,7 @@ async function getAnnotatedSchemaBase64(scheda) {
                         rectX = px + 30; // Destra
                         rectY = py - 5 - h/2;
                     } else if (pin.id === 'misura3' || pin.id === 'misura5') {
-                        rectX = px - w - 25; // Sinistra
+                        rectX = px + 25; // A destra
                         rectY = py - 5 - h/2;
                     } else {
                         rectX = px - w/2; // Sotto (centrato)
