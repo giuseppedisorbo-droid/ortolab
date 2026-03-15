@@ -790,19 +790,21 @@ async function getAnnotatedSchemaBase64(scheda) {
                     let px = img.width * pin.x;
                     let py = img.height * pin.y;
                     
-                    if (pin.id === 'misura7') {
-                        px += 30; // Destra
-                        py -= 5;
-                    } else {
-                        py += 40; // Sotto
-                    }
-
                     const metrics = ctx.measureText(text);
                     const w = metrics.width + 16;
                     const h = 32;
                     
-                    let rectX = pin.id === 'misura7' ? px : px - w/2;
-                    let rectY = py - h/2;
+                    let rectX, rectY;
+                    if (pin.id === 'misura7') {
+                        rectX = px + 30; // Destra
+                        rectY = py - 5 - h/2;
+                    } else if (pin.id === 'misura3' || pin.id === 'misura5') {
+                        rectX = px - w - 25; // Sinistra
+                        rectY = py - 5 - h/2;
+                    } else {
+                        rectX = px - w/2; // Sotto (centrato)
+                        rectY = py + 40 - h/2;
+                    }
                     
                     // Box background: giallo per le prioritarie, rosso per le altre
                     const priorityMeasures = ['misura1', 'misura4', 'misura7', 'misura10', 'misura11'];
@@ -881,8 +883,10 @@ window.generateSinglePdf = async function(id, forceDownload = false) {
                     },
                     {
                         width: '*',
-                        text: 'Scheda Valutazione Ausili',
-                        style: 'documentTitle',
+                        text: [
+                            { text: 'Scheda Valutazione Ausili\n', style: 'documentTitle' },
+                            { text: `N° ${String(scheda.progressivo || 0).padStart(3, '0')}`, fontSize: 13, bold: true, color: '#dc2626' }
+                        ],
                         alignment: 'center',
                         margin: [0, 8, 0, 0]
                     },
